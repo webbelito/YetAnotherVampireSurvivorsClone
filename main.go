@@ -13,11 +13,11 @@ const SCREEN_TITLE = "YAVSC - Yet Another Vampire Survivors Clone"
 
 func main() {
 
-	player := player.NewPlayer("Dracula", 50, 100)
+	player := player.NewPlayer("Dracula", 50, 100, 150)
 
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-	rl.SetTargetFPS(144)
+	rl.SetTargetFPS(60)
 	fmt.Println(player.GetName())
 
 	for !rl.WindowShouldClose() {
@@ -26,7 +26,7 @@ func main() {
 
 		rl.ClearBackground(rl.RayWhite)
 
-		player.Render()
+		player.Update()
 
 		rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
 
