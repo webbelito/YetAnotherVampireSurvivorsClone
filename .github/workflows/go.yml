@@ -32,15 +32,7 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-
-    # Install dependencies and set up the environment for building with raylib
-    - name: Install raylib and dependencies
-      run: |
-        # Download and extract raylib for Windows
-        curl -LO https://github.com/raysan5/raylib/releases/download/4.5.0/raylib-4.5.0_win64_mingw.zip
-        tar -xf raylib-4.5.0_win64_mingw.zip
-        set PATH=%cd%\raylib-4.5.0_win64_mingw\mingw\bin;%PATH%
-
+    
     # Run tests
     - name: Run tests
       run: go test ./...
