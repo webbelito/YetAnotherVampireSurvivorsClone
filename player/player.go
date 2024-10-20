@@ -37,9 +37,27 @@ func (p *Player) Update() {
 func (p *Player) HandleMovment() {
 	p.X += float32(p.directionX) * p.Speed * rl.GetFrameTime()
 	p.Y += float32(p.directionY) * p.Speed * rl.GetFrameTime()
+
+	// Limit player movement to screen width
+	if p.X <= 0 {
+		p.X = 0
+	} else if p.X >= float32(int32(rl.GetScreenWidth())-p.Width) {
+		p.X = float32(int32(rl.GetScreenWidth()) - p.Width)
+	}
+
+	// Limit player movement to screen height
+	if p.Y <= 0 {
+		p.Y = 0
+	}
+	if p.Y >= float32(int32(rl.GetScreenHeight())-p.Height) {
+		p.Y = float32(int32(rl.GetScreenHeight()) - p.Height)
+	}
+
 }
 
 func (p *Player) HandleInput() {
+
+	// Handle horizontal movement
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
 		p.directionX = 1
 	} else if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
@@ -48,6 +66,7 @@ func (p *Player) HandleInput() {
 		p.directionX = 0
 	}
 
+	// Handle vertical movement
 	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
 		p.directionY = -1
 	} else if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
