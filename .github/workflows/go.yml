@@ -37,7 +37,8 @@ jobs:
     - name: Install raylib 5.0 and dependencies
       run: |
         curl -LO https://github.com/raysan5/raylib/releases/download/5.0.0/raylib-5.0.0_win64_mingw.zip
-        tar -xf raylib-5.0.0_win64_mingw.zip
+        # Unzip using PowerShell
+        powershell -command "Expand-Archive -Path 'raylib-5.0.0_win64_mingw.zip' -DestinationPath '.'"
         set PATH=%cd%\raylib-5.0.0_win64_mingw\mingw\bin;%PATH%
         # Set up CGO environment variables to point to raylib's libraries
         set CGO_CFLAGS="-I%cd%\raylib-5.0.0_win64_mingw\include"
