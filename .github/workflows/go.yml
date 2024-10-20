@@ -1,4 +1,4 @@
-name: Go CI
+name: Go CI (Windows)
 
 on:
   push:
@@ -20,33 +20,38 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: 1.23.2 # Or the Go version you're using
+        go-version: 1.20
 
+    # Cache Go modules
     - name: Cache Go modules
       uses: actions/cache@v3
       with:
         path: |
-          ~/.cache/go-build
+          ~/AppData/Local/go-build
           ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Install dependencies
-      run: go mod tidy
+    # Install dependencies and set up the environment for building with raylib
+    - name: Install raylib and dependencies
+      run: |
+        # Download and extract raylib for Windows
+        curl -LO https://github.com/raysan5/raylib/releases/download/4.5.0/raylib-4.5.0_win64_mingw.zip
+        tar -xf raylib-4.5.0_win64_mingw.zip
+        set PATH=%cd%\raylib-4.5.0_win64_mingw\mingw\bin;%PATH%
 
-    # Test core logic (if applicable) on Linux
-    - name: Run tests on Windows
+    # Run tests
+    - name: Run tests
       run: go test ./...
 
-    # Build Windows executable (cross-compilation)
+    # Build Windows executable
     - name: Build Windows executable
-      run: |
-        GOOS=windows GOARCH=amd64 go build -v -o game.exe ./...
+      run: go build -v -o game.exe ./...
 
-    # Upload Windows build artifact (the .exe file)
-    - name: Upload Windows Build Artifact
+    # Upload Windows build artifact
+    - name: Upload Build Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: yavsc-windows
-        path: ./yavsc.exe
+        name: yavsc-game-windows
+        path: ./yavsc-game.exe
