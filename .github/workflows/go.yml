@@ -1,0 +1,56 @@
+name: Go CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.23.2 # Or the Go version you're using
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Install dependencies
+      run: go mod tidy
+
+    # Test core logic (if applicable) on Linux
+    - name: Run tests on Linux
+      run: go test ./...
+
+    # Build Linux binary (optional if you need to test on Linux)
+    - name: Build Linux executable
+      run: go build -v -o game_linux ./...
+
+    # Build Windows executable (cross-compilation)
+    - name: Build Windows executable
+      run: |
+        GOOS=windows GOARCH=amd64 go build -v -o game.exe ./...
+
+    # Upload Windows build artifact (the .exe file)
+    - name: Upload Windows Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: yavsc-windows
+        path: ./yavsc.exe
