@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -36,12 +36,8 @@ jobs:
       run: go mod tidy
 
     # Test core logic (if applicable) on Linux
-    - name: Run tests on Linux
+    - name: Run tests on Windows
       run: go test ./...
-
-    # Build Linux binary (optional if you need to test on Linux)
-    - name: Build Linux executable
-      run: go build -v -o game_linux ./...
 
     # Build Windows executable (cross-compilation)
     - name: Build Windows executable
