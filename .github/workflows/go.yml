@@ -39,10 +39,11 @@ jobs:
         curl -LO https://github.com/raysan5/raylib/releases/download/5.0.0/raylib-5.0.0_win64_mingw.zip
         # Unzip using PowerShell
         powershell -command "Expand-Archive -Path 'raylib-5.0.0_win64_mingw.zip' -DestinationPath '.'"
-        set PATH=%cd%\raylib-5.0.0_win64_mingw\mingw\bin;%PATH%
+        # Update the PATH environment variable
+        echo "##[set-env name=PATH;]$PWD/raylib-5.0.0_win64_mingw/mingw/bin;$env:PATH"
         # Set up CGO environment variables to point to raylib's libraries
-        set CGO_CFLAGS="-I%cd%\raylib-5.0.0_win64_mingw\include"
-        set CGO_LDFLAGS="-L%cd%\raylib-5.0.0_win64_mingw\lib -lraylib -lopengl32 -lgdi32 -lwinmm"
+        echo "##[set-env name=CGO_CFLAGS;]$PWD/raylib-5.0.0_win64_mingw/include"
+        echo "##[set-env name=CGO_LDFLAGS;]$PWD/raylib-5.0.0_win64_mingw/lib -lraylib -lopengl32 -lgdi32 -lwinmm"
 
     # Run tests
     - name: Run tests
