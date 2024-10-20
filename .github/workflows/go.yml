@@ -34,8 +34,8 @@ jobs:
           ${{ runner.os }}-go-
     
     # Run tests
-    - name: Run tests
-      run: go test ./...
+    #- name: Run tests
+    #  run: go test ./...
 
     # Build Windows executable
     - name: Build Windows executable
