@@ -1,7 +1,11 @@
 package enemy
 
 import (
+	"fmt"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
 )
 
 const (
@@ -14,11 +18,14 @@ type Enemy struct {
 	Y      float32
 	Width  int32
 	Height int32
+	Speed  float32
 	SpawnX float32
 	SpawnY float32
+	Health int32
+	Damage int32
 }
 
-func NewEnemy(n string, w int32, h int32) *Enemy {
+func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Enemy {
 
 	e := &Enemy{
 		Name:   n,
@@ -26,6 +33,9 @@ func NewEnemy(n string, w int32, h int32) *Enemy {
 		Y:      0,
 		Width:  w,
 		Height: h,
+		Speed:  s,
+		Health: health,
+		Damage: d,
 	}
 
 	e.RandomizeSpawnPosition()
@@ -33,7 +43,11 @@ func NewEnemy(n string, w int32, h int32) *Enemy {
 	return e
 }
 
-func (e *Enemy) Update() {
+// TODO: Remove the reference to the player via argument
+func (e *Enemy) Update(p *player.Player) {
+
+	e.MoveTowardsPlayer(p)
+
 	e.Render()
 }
 
@@ -43,6 +57,20 @@ func (e *Enemy) Render() {
 
 func (e *Enemy) Spawn() {
 	e.RandomizeSpawnPosition()
+}
+
+func (e *Enemy) MoveTowardsPlayer(p *player.Player) {
+	if e.X < p.X {
+		e.X += 1
+	} else if e.X > p.X {
+		e.X -= 1
+	}
+
+	if e.Y < p.Y {
+		e.Y += 1
+	} else if e.Y > p.Y {
+		e.Y -= 1
+	}
 }
 
 func (e *Enemy) RandomizeSpawnPosition() {
@@ -61,4 +89,18 @@ func (e *Enemy) RandomizeSpawnPosition() {
 		e.Y = float32(rl.GetRandomValue(int32(rl.GetScreenHeight())-e.Height-SPAWN_DISTANCE, int32(rl.GetScreenHeight()-int(e.Height))))
 	}
 
+}
+
+func (e *Enemy) GetPosition() (float32, float32) {
+	return e.X, e.Y
+}
+
+func (e *Enemy) Attack(entity entity.Entity) {
+	entity.TakeDamage(e.Damage)
+}
+
+func (e *Enemy) TakeDamage(d int32) {
+	e.Health -= d
+
+	fmt.Println(e.Name, "took", d, "damage. Remaining health:", e.Health)
 }

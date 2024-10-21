@@ -1,7 +1,10 @@
 package player
 
 import (
+	"fmt"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
 )
 
 type Player struct {
@@ -13,9 +16,11 @@ type Player struct {
 	Speed      float32
 	directionX int32
 	directionY int32
+	Health     int32
+	Damage     int32
 }
 
-func NewPlayer(n string, w int32, h int32, s float32) *Player {
+func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Player {
 	return &Player{
 		Name:       n,
 		X:          0,
@@ -25,6 +30,8 @@ func NewPlayer(n string, w int32, h int32, s float32) *Player {
 		Speed:      s,
 		directionX: 0,
 		directionY: 0,
+		Health:     health,
+		Damage:     d,
 	}
 }
 
@@ -74,6 +81,20 @@ func (p *Player) HandleInput() {
 	} else {
 		p.directionY = 0
 	}
+}
+
+func (p *Player) Attack(e entity.Entity) {
+	e.TakeDamage(p.Damage)
+}
+
+func (p *Player) TakeDamage(damage int32) {
+	p.Health -= damage
+
+	fmt.Println(p.Name, "took", damage, "damage. Remaining health:", p.Health)
+}
+
+func (p *Player) GetPosition() (float32, float32) {
+	return p.X, p.Y
 }
 
 func (p *Player) Render() {
