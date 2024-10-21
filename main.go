@@ -6,6 +6,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/enemy"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
 )
 
 // Window settings
@@ -36,7 +37,8 @@ func main() {
 	rl.SetTargetFPS(144)
 	fmt.Println(player.GetName())
 
-	enemy := enemy.NewEnemy("Bat", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE)
+	// TODO: Implement a map of enemies
+	enemy.NewEnemy("Bat", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE)
 
 	for !rl.WindowShouldClose() {
 
@@ -46,19 +48,19 @@ func main() {
 
 		// TODO: Implement a better way to spawn enemies
 		if rl.IsKeyPressed(rl.KeySpace) {
-			enemy.Spawn()
+			enemy.NewEnemy("Bat", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE)
 		}
 
 		if rl.IsKeyReleased(rl.KeyT) {
-			player.Attack(enemy)
 		}
 
 		if rl.IsKeyReleased(rl.KeyR) {
-			enemy.Attack(player)
 		}
 
 		player.Update()
 		enemy.Update(player)
+
+		projectile.Update()
 
 		rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
 

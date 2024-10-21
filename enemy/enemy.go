@@ -12,6 +12,8 @@ const (
 	SPAWN_DISTANCE = 100
 )
 
+var enemies []Enemy
+
 type Enemy struct {
 	Name   string
 	X      float32
@@ -25,7 +27,7 @@ type Enemy struct {
 	Damage int32
 }
 
-func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Enemy {
+func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) {
 
 	e := &Enemy{
 		Name:   n,
@@ -40,15 +42,15 @@ func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Ene
 
 	e.RandomizeSpawnPosition()
 
-	return e
+	enemies = append(enemies, *e)
 }
 
-// TODO: Remove the reference to the player via argument
-func (e *Enemy) Update(p *player.Player) {
+func Update(p *player.Player) {
 
-	e.MoveTowardsPlayer(p)
-
-	e.Render()
+	for i := 0; i < len(enemies); i++ {
+		enemies[i].MoveTowardsPlayer(p)
+		enemies[i].Render()
+	}
 }
 
 func (e *Enemy) Render() {

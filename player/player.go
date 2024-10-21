@@ -5,39 +5,45 @@ import (
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
 )
 
 type Player struct {
-	Name       string
-	X          float32
-	Y          float32
-	Width      int32
-	Height     int32
-	Speed      float32
-	directionX int32
-	directionY int32
-	Health     int32
-	Damage     int32
+	Name          string
+	X             float32
+	Y             float32
+	Width         int32
+	Height        int32
+	Speed         float32
+	directionX    int32
+	directionY    int32
+	Health        int32
+	Damage        int32
+	LastShotTime  float64
+	ShootCooldown float32
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Player {
 	return &Player{
-		Name:       n,
-		X:          0,
-		Y:          0,
-		Width:      w,
-		Height:     h,
-		Speed:      s,
-		directionX: 0,
-		directionY: 0,
-		Health:     health,
-		Damage:     d,
+		Name:          n,
+		X:             0,
+		Y:             0,
+		Width:         w,
+		Height:        h,
+		Speed:         s,
+		directionX:    0,
+		directionY:    0,
+		Health:        health,
+		Damage:        d,
+		LastShotTime:  0,
+		ShootCooldown: 2,
 	}
 }
 
 func (p *Player) Update() {
 	p.HandleInput()
 	p.HandleMovment()
+	p.Shoot()
 	p.Render()
 }
 
@@ -103,4 +109,28 @@ func (p *Player) Render() {
 
 func (p *Player) GetName() string {
 	return p.Name
+}
+
+// Shooting
+func (p *Player) CanShoot() bool {
+	currentTime := rl.GetTime()
+	return (currentTime-p.LastShotTime >= float64(p.ShootCooldown))
+}
+
+func (p *Player) Shoot() {
+	if p.CanShoot() {
+		p.LastShotTime = rl.GetTime()
+		// TODO: Implement projectilei
+
+		mousePos := rl.GetMousePosition()
+		direction := rl.Vector2{
+			X: mousePos.X - float32(p.X),
+			Y: mousePos.Y - float32(p.Y),
+		}
+
+		direction = rl.Vector2Normalize(direction)
+
+		projectile.SpawnProjectile(p.X+float32(p.Width/2), p.Y+float32(p.Height/2), 5, 500, direction)
+		fmt.Println("Shooting")
+	}
 }
