@@ -3,12 +3,17 @@ package player
 import (
 	"fmt"
 
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-type Player struct {
+type Player interface {
+	GetPosition() (float32, float32)
+}
+
+type PlayerCharacter struct {
 	Name          string
 	X             float32
 	Y             float32
@@ -21,10 +26,11 @@ type Player struct {
 	Damage        int32
 	LastShotTime  float64
 	ShootCooldown float32
+	Projectiles   *[]*projectile.Projectile
 }
 
-func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Player {
-	return &Player{
+func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *PlayerCharacter {
+	return &PlayerCharacter{
 		Name:          n,
 		X:             0,
 		Y:             0,
@@ -40,14 +46,14 @@ func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Pl
 	}
 }
 
-func (p *Player) Update() {
+func (p *PlayerCharacter) Update() {
 	p.HandleInput()
 	p.HandleMovment()
 	p.Shoot()
 	p.Render()
 }
 
-func (p *Player) HandleMovment() {
+func (p *PlayerCharacter) HandleMovment() {
 	p.X += float32(p.directionX) * p.Speed * rl.GetFrameTime()
 	p.Y += float32(p.directionY) * p.Speed * rl.GetFrameTime()
 
@@ -68,7 +74,7 @@ func (p *Player) HandleMovment() {
 
 }
 
-func (p *Player) HandleInput() {
+func (p *PlayerCharacter) HandleInput() {
 
 	// Handle horizontal movement
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
@@ -89,39 +95,37 @@ func (p *Player) HandleInput() {
 	}
 }
 
-func (p *Player) Attack(e entity.Entity) {
+func (p *PlayerCharacter) Attack(e entity.Entity) {
 	e.TakeDamage(p.Damage)
 }
 
-func (p *Player) TakeDamage(damage int32) {
+func (p *PlayerCharacter) TakeDamage(damage int32) {
 	p.Health -= damage
 
 	fmt.Println(p.Name, "took", damage, "damage. Remaining health:", p.Health)
 }
 
-func (p *Player) GetPosition() (float32, float32) {
-	return p.X, p.Y
-}
-
-func (p *Player) Render() {
+func (p *PlayerCharacter) Render() {
 	rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
 }
 
-func (p *Player) GetName() string {
+func (p *PlayerCharacter) GetName() string {
 	return p.Name
 }
 
+func (p *PlayerCharacter) GetPosition() (float32, float32) {
+	return p.X, p.Y
+}
+
 // Shooting
-func (p *Player) CanShoot() bool {
+func (p *PlayerCharacter) CanShoot() bool {
 	currentTime := rl.GetTime()
 	return (currentTime-p.LastShotTime >= float64(p.ShootCooldown))
 }
 
-func (p *Player) Shoot() {
+func (p *PlayerCharacter) Shoot() {
 	if p.CanShoot() {
 		p.LastShotTime = rl.GetTime()
-		// TODO: Implement projectilei
-
 		mousePos := rl.GetMousePosition()
 		direction := rl.Vector2{
 			X: mousePos.X - float32(p.X),
@@ -130,7 +134,10 @@ func (p *Player) Shoot() {
 
 		direction = rl.Vector2Normalize(direction)
 
-		projectile.SpawnProjectile(p.X+float32(p.Width/2), p.Y+float32(p.Height/2), 5, 500, direction)
-		fmt.Println("Shooting")
+		rl.TraceLog(rl.LogInfo, "Player shoot direction: %v\n", direction)
+
+		// TODO: Spawn a new projectile
+		//projectiles = append(projectiles, projectile.NewProjectile(float32(p.X), float32(p.Y), 5, 500, direction))
+
 	}
 }

@@ -1,12 +1,11 @@
 package main
 
-import (
-	"fmt"
-
-	rl "github.com/gen2brain/raylib-go/raylib"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/enemy"
+import ( /*"github.com/webbelito/YetAnotherVampireSurvivorsClone/enemy"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
+	*/ // 3rd-party library
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/game"
 )
 
 // Window settings
@@ -30,37 +29,21 @@ const BAT_DAMAGE = 10
 
 func main() {
 
-	player := player.NewPlayer("Dracula", PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SPEED, PLAYER_HEALTH, PLAYER_DAMAGE)
+	// Initialize the game
+	game := game.NewGame()
 
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-	rl.SetTargetFPS(144)
-	fmt.Println(player.GetName())
-
-	// TODO: Implement a map of enemies
-	enemy.NewEnemy("Bat", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE)
+	rl.SetTargetFPS(180)
 
 	for !rl.WindowShouldClose() {
 
 		rl.BeginDrawing()
 
+		game.Update()
 		rl.ClearBackground(rl.RayWhite)
 
-		// TODO: Implement a better way to spawn enemies
-		if rl.IsKeyPressed(rl.KeySpace) {
-			enemy.NewEnemy("Bat", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE)
-		}
-
-		if rl.IsKeyReleased(rl.KeyT) {
-		}
-
-		if rl.IsKeyReleased(rl.KeyR) {
-		}
-
-		player.Update()
-		enemy.Update(player)
-
-		projectile.Update()
+		rl.DrawFPS(10, 10)
 
 		rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
 
@@ -69,3 +52,41 @@ func main() {
 
 	rl.CloseWindow()
 }
+
+/*
+func InitGame() {
+
+	// Initialize the Game struct
+	game := &Game{}
+
+	game.playerObj = player.NewPlayer("Dracula", PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SPEED, PLAYER_HEALTH, PLAYER_DAMAGE)
+	game.enemies = []*enemy.Enemy{}
+	game.projectiles = []*projectile.Projectile{}
+
+}
+
+func UpdateGame() {
+
+	game.playerObj.Update()
+
+	// Update all enemies
+	for i := 0; i < len(game.enemies); i++ {
+		game.enemies[i].Update(game.playerObj)
+	}
+
+	// Update all projectiles
+	for i := 0; i < len(game.projectiles); i++ {
+		game.projectiles[i].Update()
+	}
+
+	// Spawn 'BAT' enemies
+	if rl.IsKeyPressed(rl.KeySpace) {
+		game.enemies = append(game.enemies, enemy.NewEnemy("BAT", BAT_WIDTH, BAT_HEIGHT, BAT_SPEED, BAT_HEALTH, BAT_DAMAGE))
+	}
+}
+
+func (g *Game) SpawnProjectile(x float32, y float32, radius float32, speed float32, direction rl.Vector2) {
+	g.projectiles = append(g.projectiles, projectile.NewProjectile(x, y, radius, speed, direction))
+
+}
+*/

@@ -1,6 +1,8 @@
 package projectile
 
 import (
+	"fmt"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -13,11 +15,13 @@ type Projectile struct {
 	Direction rl.Vector2
 }
 
-var projectiles []Projectile
+type ProjectileSpawner interface {
+	SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2)
+}
 
-func SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2) {
+func NewProjectile(x, y, radius, speed float32, direction rl.Vector2) *Projectile {
 
-	projectile := Projectile{
+	return &Projectile{
 		X:         x,
 		Y:         y,
 		Radius:    radius,
@@ -25,27 +29,43 @@ func SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2) {
 		Active:    true,
 		Direction: direction,
 	}
-
-	projectiles = append(projectiles, projectile)
 }
 
-func Update() {
+func (p *Projectile) Update() {
 
-	for i := 0; i < len(projectiles); i++ {
-
-		if projectiles[i].Active {
-			projectiles[i].X += projectiles[i].Direction.X * projectiles[i].Speed * rl.GetFrameTime()
-			projectiles[i].Y += projectiles[i].Direction.Y * projectiles[i].Speed * rl.GetFrameTime()
-			projectiles[i].Render()
-		}
-
-		// Deactivate projectiles that are out of bounds
-		if projectiles[i].X < 0 || projectiles[i].X > float32(rl.GetScreenWidth()) || projectiles[i].Y < 0 || projectiles[i].Y > float32(rl.GetScreenHeight()) {
-			projectiles[i].Active = false
-			// Remove the projectile from the slice
-			projectiles = append(projectiles[:i], projectiles[i+1:]...)
-		}
+	if p.Active {
+		p.X += p.Direction.X * p.Speed * rl.GetFrameTime()
+		p.Y += p.Direction.Y * p.Speed * rl.GetFrameTime()
+		p.Render()
+		fmt.Println("Projectile is active")
 	}
+
+	/*
+		// Deactivate projectiles that are out of bounds
+		if p.X < 0 || p.X > float32(rl.GetScreenWidth()) || p.Y < 0 || p.Y > float32(rl.GetScreenHeight()) {
+			p.Active = false
+
+			// TODO: Remove the projectile from the slice
+		}
+	*/
+
+	/*
+		for i := 0; i < len(projectiles); i++ {
+
+			if projectiles[i].Active {
+				projectiles[i].X += projectiles[i].Direction.X * projectiles[i].Speed * rl.GetFrameTime()
+				projectiles[i].Y += projectiles[i].Direction.Y * projectiles[i].Speed * rl.GetFrameTime()
+				projectiles[i].Render()
+			}
+
+			// Deactivate projectiles that are out of bounds
+			if projectiles[i].X < 0 || projectiles[i].X > float32(rl.GetScreenWidth()) || projectiles[i].Y < 0 || projectiles[i].Y > float32(rl.GetScreenHeight()) {
+				projectiles[i].Active = false
+				// Remove the projectile from the slice
+				projectiles = append(projectiles[:i], projectiles[i+1:]...)
+			}
+		}
+	*/
 }
 
 func (p *Projectile) Render() {

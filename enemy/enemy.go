@@ -6,13 +6,12 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
 	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
+	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
 )
 
 const (
 	SPAWN_DISTANCE = 100
 )
-
-var enemies []Enemy
 
 type Enemy struct {
 	Name   string
@@ -27,7 +26,7 @@ type Enemy struct {
 	Damage int32
 }
 
-func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) {
+func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Enemy {
 
 	e := &Enemy{
 		Name:   n,
@@ -42,15 +41,22 @@ func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) {
 
 	e.RandomizeSpawnPosition()
 
-	enemies = append(enemies, *e)
+	return e
+
 }
 
-func Update(p *player.Player) {
+func (e *Enemy) Update(target player.Player) {
 
-	for i := 0; i < len(enemies); i++ {
+	/*for i := 0; i < len(e.); i++ {
 		enemies[i].MoveTowardsPlayer(p)
 		enemies[i].Render()
 	}
+	*/
+
+	playerPosX, playerPosY := target.GetPosition()
+
+	e.MoveTowardsPlayer(playerPosX, playerPosY)
+	e.Render()
 }
 
 func (e *Enemy) Render() {
@@ -61,17 +67,18 @@ func (e *Enemy) Spawn() {
 	e.RandomizeSpawnPosition()
 }
 
-func (e *Enemy) MoveTowardsPlayer(p *player.Player) {
-	if e.X < p.X {
-		e.X += 1
-	} else if e.X > p.X {
-		e.X -= 1
+func (e *Enemy) MoveTowardsPlayer(posX, posY float32) {
+
+	if e.X < posX {
+		e.X += 1 * e.Speed * rl.GetFrameTime()
+	} else if e.X > posX {
+		e.X -= 1 * e.Speed * rl.GetFrameTime()
 	}
 
-	if e.Y < p.Y {
-		e.Y += 1
-	} else if e.Y > p.Y {
-		e.Y -= 1
+	if e.Y < posY {
+		e.Y += 1 * e.Speed * rl.GetFrameTime()
+	} else if e.Y > posY {
+		e.Y -= 1 * e.Speed * rl.GetFrameTime()
 	}
 }
 
@@ -105,4 +112,28 @@ func (e *Enemy) TakeDamage(d int32) {
 	e.Health -= d
 
 	fmt.Println(e.Name, "took", d, "damage. Remaining health:", e.Health)
+}
+
+func CheckCollisionAABB(p projectile.Projectile, e *Enemy) bool {
+
+	/*
+		// Check distance to X
+		distX := p.X - e.X
+
+		// Check distance to Y
+		distY := p.Y - e.Y
+
+		// Calculate distance
+		distance := float32(rl.Sqrt(float64((distX * distX) + (distY * distY))))
+	*/
+
+	// Check if the distance is less than the sum of the radii
+
+	// Check if the projectile is inside the enemy with radius of the projectile
+	return p.X < e.X+float32(e.Width) && p.X > e.X && p.Y > e.Y && p.Y < e.Y+float32(e.Height)
+
+	// Right of the projectile
+	// Above the projectile
+	// Below the projectile
+
 }
