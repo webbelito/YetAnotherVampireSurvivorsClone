@@ -1,8 +1,6 @@
-package projectile
+package main
 
 import (
-	"fmt"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -31,44 +29,46 @@ func NewProjectile(x, y, radius, speed float32, direction rl.Vector2) *Projectil
 	}
 }
 
-func (p *Projectile) Update() {
+func (p *Projectile) Update(g *Game) {
 
 	if p.Active {
 		p.X += p.Direction.X * p.Speed * rl.GetFrameTime()
 		p.Y += p.Direction.Y * p.Speed * rl.GetFrameTime()
-		p.Render()
-		fmt.Println("Projectile is active")
-	}
 
-	/*
+		// Check for collisions with enemies
+		for _, enemy := range g.Enemies {
+			if p.CollidesWith(enemy) {
+				p.Active = false
+				enemy.TakeDamage(g.Player.Damage)
+				break
+			}
+		}
+
+		p.Render()
+
 		// Deactivate projectiles that are out of bounds
 		if p.X < 0 || p.X > float32(rl.GetScreenWidth()) || p.Y < 0 || p.Y > float32(rl.GetScreenHeight()) {
 			p.Active = false
-
-			// TODO: Remove the projectile from the slice
 		}
-	*/
-
-	/*
-		for i := 0; i < len(projectiles); i++ {
-
-			if projectiles[i].Active {
-				projectiles[i].X += projectiles[i].Direction.X * projectiles[i].Speed * rl.GetFrameTime()
-				projectiles[i].Y += projectiles[i].Direction.Y * projectiles[i].Speed * rl.GetFrameTime()
-				projectiles[i].Render()
-			}
-
-			// Deactivate projectiles that are out of bounds
-			if projectiles[i].X < 0 || projectiles[i].X > float32(rl.GetScreenWidth()) || projectiles[i].Y < 0 || projectiles[i].Y > float32(rl.GetScreenHeight()) {
-				projectiles[i].Active = false
-				// Remove the projectile from the slice
-				projectiles = append(projectiles[:i], projectiles[i+1:]...)
-			}
-		}
-	*/
+	}
 }
 
 func (p *Projectile) Render() {
-
 	rl.DrawCircle(int32(p.X), int32(p.Y), p.Radius, rl.Black)
+}
+
+func (p *Projectile) CollidesWith(e *Enemy) bool {
+	return rl.CheckCollisionCircleRec(
+		rl.Vector2{
+			X: p.X,
+			Y: p.Y,
+		},
+		p.Radius,
+		rl.Rectangle{
+			X:      e.X,
+			Y:      e.Y,
+			Width:  float32(e.Width),
+			Height: float32(e.Height),
+		},
+	)
 }

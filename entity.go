@@ -1,4 +1,4 @@
-package entity
+package main
 
 type Entity interface {
 	TakeDamage(damage int32)

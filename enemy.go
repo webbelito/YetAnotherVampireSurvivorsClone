@@ -1,13 +1,14 @@
-package enemy
+package main
 
 import (
 	"fmt"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
-)
+	/*
+		"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
+		"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
+		"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
+	*/)
 
 const (
 	SPAWN_DISTANCE = 100
@@ -45,7 +46,7 @@ func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Ene
 
 }
 
-func (e *Enemy) Update(target player.Player) {
+func (e *Enemy) Update(target Player) {
 
 	/*for i := 0; i < len(e.); i++ {
 		enemies[i].MoveTowardsPlayer(p)
@@ -104,7 +105,7 @@ func (e *Enemy) GetPosition() (float32, float32) {
 	return e.X, e.Y
 }
 
-func (e *Enemy) Attack(entity entity.Entity) {
+func (e *Enemy) Attack(entity Entity) {
 	entity.TakeDamage(e.Damage)
 }
 
@@ -114,7 +115,7 @@ func (e *Enemy) TakeDamage(d int32) {
 	fmt.Println(e.Name, "took", d, "damage. Remaining health:", e.Health)
 }
 
-func CheckCollisionAABB(p projectile.Projectile, e *Enemy) bool {
+func CheckCollisionAABB(p Projectile, e *Enemy) bool {
 
 	/*
 		// Check distance to X

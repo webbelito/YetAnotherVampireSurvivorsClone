@@ -1,10 +1,7 @@
-package player
+package main
 
 import (
 	"fmt"
-
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -26,7 +23,7 @@ type PlayerCharacter struct {
 	Damage        int32
 	LastShotTime  float64
 	ShootCooldown float32
-	Projectiles   *[]*projectile.Projectile
+	Projectiles   *[]*Projectile
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *PlayerCharacter {
@@ -42,14 +39,14 @@ func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Pl
 		Health:        health,
 		Damage:        d,
 		LastShotTime:  0,
-		ShootCooldown: 2,
+		ShootCooldown: 1,
 	}
 }
 
-func (p *PlayerCharacter) Update() {
+func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleInput()
 	p.HandleMovment()
-	p.Shoot()
+	p.Shoot(g)
 	p.Render()
 }
 
@@ -95,7 +92,7 @@ func (p *PlayerCharacter) HandleInput() {
 	}
 }
 
-func (p *PlayerCharacter) Attack(e entity.Entity) {
+func (p *PlayerCharacter) Attack(e Entity) {
 	e.TakeDamage(p.Damage)
 }
 
@@ -123,7 +120,7 @@ func (p *PlayerCharacter) CanShoot() bool {
 	return (currentTime-p.LastShotTime >= float64(p.ShootCooldown))
 }
 
-func (p *PlayerCharacter) Shoot() {
+func (p *PlayerCharacter) Shoot(g *Game) {
 	if p.CanShoot() {
 		p.LastShotTime = rl.GetTime()
 		mousePos := rl.GetMousePosition()
@@ -134,10 +131,7 @@ func (p *PlayerCharacter) Shoot() {
 
 		direction = rl.Vector2Normalize(direction)
 
-		rl.TraceLog(rl.LogInfo, "Player shoot direction: %v\n", direction)
-
-		// TODO: Spawn a new projectile
-		//projectiles = append(projectiles, projectile.NewProjectile(float32(p.X), float32(p.Y), 5, 500, direction))
+		g.SpawnProjectile(float32(p.X), float32(p.Y), 5, 500, direction)
 
 	}
 }
