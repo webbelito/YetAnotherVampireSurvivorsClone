@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -23,6 +21,8 @@ type PlayerCharacter struct {
 	Damage          int32
 	LastShotTime    float64
 	ShootCooldown   float32
+	LastMeleeTime   float64
+	MeleeCooldown   float32
 	Projectiles     *[]*Projectile
 	AttackDirection rl.Vector2
 }
@@ -41,14 +41,19 @@ func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Pl
 		Damage:        d,
 		LastShotTime:  0,
 		ShootCooldown: 1,
+		LastMeleeTime: 0,
+		MeleeCooldown: 2,
 	}
 }
 
 func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleInput()
 	p.HandleMovment()
-	p.Shoot(g)
+	p.Fire(g)
+	p.Melee(g)
 	p.Render()
+
+	//p.DrawAttackTriangle(p.CalculcateMeleeAttackArea(100, 300))
 }
 
 func (p *PlayerCharacter) HandleMovment() {
@@ -104,7 +109,7 @@ func (p *PlayerCharacter) Attack(e Entity) {
 func (p *PlayerCharacter) TakeDamage(damage int32) {
 	p.Health -= damage
 
-	fmt.Println(p.Name, "took", damage, "damage. Remaining health:", p.Health)
+	//fmt.Println(p.Name, "took", damage, "damage. Remaining health:", p.Health)
 }
 
 func (p *PlayerCharacter) Render() {
@@ -124,7 +129,7 @@ func (p *PlayerCharacter) CanShoot() bool {
 	return (p.LastShotTime >= float64(p.ShootCooldown))
 }
 
-func (p *PlayerCharacter) Shoot(g *Game) {
+func (p *PlayerCharacter) Fire(g *Game) {
 
 	// Update the timer
 	p.LastShotTime += float64(rl.GetFrameTime())
@@ -151,14 +156,63 @@ func (p *PlayerCharacter) Shoot(g *Game) {
 
 }
 
-func (p *PlayerCharacter) DrawAttackTriangle(length float32, baseWidth float32) {
+func (p *PlayerCharacter) CanMeleeAttack() bool {
+	return (p.LastMeleeTime >= float64(p.MeleeCooldown))
+}
+
+func (p *PlayerCharacter) Melee(g *Game) {
+
+	// Update the timer
+	p.LastMeleeTime += float64(rl.GetFrameTime())
+
+	if p.CanMeleeAttack() {
+
+		// Reset the last melee attack time
+		p.LastMeleeTime = 0
+
+		// Calculate the melee attack area
+		tip, baseLeftCorner, baseRightCorner := p.CalculcateMeleeAttackArea(100, 300)
+
+		// Check for collisions with enemies
+
+		for i := 0; i < len(g.Enemies); i++ {
+			if rl.CheckCollisionPointTriangle(rl.Vector2{X: g.Enemies[i].X, Y: g.Enemies[i].Y}, tip, baseLeftCorner, baseRightCorner) {
+				if !g.Enemies[i].IsDead {
+					g.Enemies[i].TakeDamage(p.Damage)
+				}
+			}
+
+		}
+
+		// Draw the attack triangle
+		p.DrawAttackTriangle(tip, baseLeftCorner, baseRightCorner)
+
+	}
+
+}
+
+func (p *PlayerCharacter) DrawAttackTriangle(tip rl.Vector2, baseLeftCorner rl.Vector2, baseRightCorner rl.Vector2) {
+
+	// Draw the triangle using the calculated points
+	rl.DrawTriangle(
+		tip,
+		baseLeftCorner,
+		baseRightCorner,
+		rl.ColorAlpha(rl.Orange, 0.3),
+	)
+}
+
+func (p *PlayerCharacter) CalculcateMeleeAttackArea(length float32, baseWidth float32) (rl.Vector2, rl.Vector2, rl.Vector2) {
 
 	// Tip of the triangle (at player position)
 	tipX := p.X + float32(p.Width)/2
 	tipY := p.Y + float32(p.Height)/2
 
 	// Normalize the attack direction
-	normalizedDirection := rl.Vector2Normalize(p.AttackDirection)
+	//normalizedDirection := rl.Vector2Normalize(p.AttackDirection)
+
+	// Normalize the attack towards the mouse
+	normalizedDirection := rl.Vector2Normalize(rl.Vector2{X: float32(rl.GetMouseX()) - tipX, Y: float32(rl.GetMouseY()) - tipY})
 
 	// Calculate the base center (wide end of the triangle)
 	baseCenterX := tipX + normalizedDirection.X*length
@@ -175,11 +229,6 @@ func (p *PlayerCharacter) DrawAttackTriangle(length float32, baseWidth float32) 
 	baseRightCornerX := baseCenterX - perpX*baseWidth/2
 	baseRightCornerY := baseCenterY - perpY*baseWidth/2
 
-	// Draw the triangle using the calculated points
-	rl.DrawTriangle(
-		rl.Vector2{X: tipX, Y: tipY},
-		rl.Vector2{X: baseLeftCornerX, Y: baseLeftCornerY},
-		rl.Vector2{X: baseRightCornerX, Y: baseRightCornerY},
-		rl.Orange,
-	)
+	return rl.Vector2{X: tipX, Y: tipY}, rl.Vector2{X: baseLeftCornerX, Y: baseLeftCornerY}, rl.Vector2{X: baseRightCornerX, Y: baseRightCornerY}
+
 }

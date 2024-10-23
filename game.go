@@ -28,26 +28,31 @@ func (g *Game) Update() {
 		g.SpawnEnemy()
 	}
 
+	// Update player
 	g.Player.Update(g)
 
+	// Update enemies
 	for i := 0; i < len(g.Enemies); i++ {
 
 		if g.Enemies[i].IsDead {
-			return
+			continue
 		}
 
 		g.Enemies[i].Update(g.Player)
 	}
 
+	// Update projectiles
 	for i := 0; i < len(g.Projectiles); i++ {
+
+		if !g.Projectiles[i].Active {
+			continue
+		}
+
 		g.Projectiles[i].Update(g)
 	}
 
 	// Draw a triangle towards the players attack direction
-	g.Player.DrawAttackTriangle(150, 300)
-
-	rl.TraceLog(rl.LogInfo, "Player x Direction: %d\n", g.Player.directionX)
-	rl.TraceLog(rl.LogInfo, "Player y Direction: %d\n", g.Player.directionY)
+	// g.Player.DrawAttackTriangle(g.Player.CalculcateMeleeAttackArea(100, 300))
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
