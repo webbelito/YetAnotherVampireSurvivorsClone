@@ -31,6 +31,11 @@ func (g *Game) Update() {
 	g.Player.Update(g)
 
 	for i := 0; i < len(g.Enemies); i++ {
+
+		if g.Enemies[i].IsDead {
+			return
+		}
+
 		g.Enemies[i].Update(g.Player)
 	}
 
@@ -39,6 +44,7 @@ func (g *Game) Update() {
 	}
 
 	g.DestroyProjectiles()
+	g.DestroyEnemy()
 
 }
 
@@ -65,5 +71,21 @@ func (g *Game) DestroyProjectiles() {
 }
 
 func (g *Game) SpawnEnemy() {
-	g.Enemies = append(g.Enemies, NewEnemy("Bat", 50, 50, 100, 100, 50))
+	g.Enemies = append(g.Enemies, NewEnemy("Bat", 50, 50, 100, 10, 50))
+}
+
+func (g *Game) DestroyEnemy() {
+
+	i := 0
+
+	for _, e := range g.Enemies {
+		if !e.IsDead {
+			g.Enemies[i] = e
+			i++
+		}
+	}
+
+	// Truncate the slice to remove dead enemies
+	g.Enemies = g.Enemies[:i]
+
 }

@@ -33,6 +33,9 @@ func main() {
 	// Initialize the game
 	game := NewGame()
 
+	// Random timer to despawn title text
+	titleDisplayTimer := float32(0.0)
+
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
 	rl.SetTargetFPS(180)
@@ -46,7 +49,10 @@ func main() {
 
 		rl.DrawFPS(10, 10)
 
-		rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
+		if titleDisplayTimer < 3.0 {
+			titleDisplayTimer = titleDisplayTimer + rl.GetFrameTime()
+			rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
+		}
 
 		rl.EndDrawing()
 	}

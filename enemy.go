@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 	/*
 		"github.com/webbelito/YetAnotherVampireSurvivorsClone/entity"
@@ -25,6 +23,7 @@ type Enemy struct {
 	SpawnY float32
 	Health int32
 	Damage int32
+	IsDead bool
 }
 
 func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Enemy {
@@ -38,6 +37,7 @@ func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Ene
 		Speed:  s,
 		Health: health,
 		Damage: d,
+		IsDead: false,
 	}
 
 	e.RandomizeSpawnPosition()
@@ -47,13 +47,6 @@ func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Ene
 }
 
 func (e *Enemy) Update(target Player) {
-
-	/*for i := 0; i < len(e.); i++ {
-		enemies[i].MoveTowardsPlayer(p)
-		enemies[i].Render()
-	}
-	*/
-
 	playerPosX, playerPosY := target.GetPosition()
 
 	e.MoveTowardsPlayer(playerPosX, playerPosY)
@@ -110,31 +103,23 @@ func (e *Enemy) Attack(entity Entity) {
 }
 
 func (e *Enemy) TakeDamage(d int32) {
+
+	if e.Health-d <= 0 {
+		e.Die()
+		return
+	}
+
 	e.Health -= d
 
-	fmt.Println(e.Name, "took", d, "damage. Remaining health:", e.Health)
+}
+
+func (e *Enemy) Die() {
+	e.IsDead = true
 }
 
 func CheckCollisionAABB(p Projectile, e *Enemy) bool {
 
-	/*
-		// Check distance to X
-		distX := p.X - e.X
-
-		// Check distance to Y
-		distY := p.Y - e.Y
-
-		// Calculate distance
-		distance := float32(rl.Sqrt(float64((distX * distX) + (distY * distY))))
-	*/
-
-	// Check if the distance is less than the sum of the radii
-
 	// Check if the projectile is inside the enemy with radius of the projectile
 	return p.X < e.X+float32(e.Width) && p.X > e.X && p.Y > e.Y && p.Y < e.Y+float32(e.Height)
-
-	// Right of the projectile
-	// Above the projectile
-	// Below the projectile
 
 }
