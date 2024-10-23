@@ -49,6 +49,7 @@ func main() {
 
 		rl.DrawFPS(10, 10)
 
+		// Display title text for 3 seconds
 		if titleDisplayTimer < 3.0 {
 			titleDisplayTimer = titleDisplayTimer + rl.GetFrameTime()
 			rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
