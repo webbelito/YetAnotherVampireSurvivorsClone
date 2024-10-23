@@ -43,6 +43,12 @@ func (g *Game) Update() {
 		g.Projectiles[i].Update(g)
 	}
 
+	// Draw a triangle towards the players attack direction
+	g.Player.DrawAttackTriangle(150, 300)
+
+	rl.TraceLog(rl.LogInfo, "Player x Direction: %d\n", g.Player.directionX)
+	rl.TraceLog(rl.LogInfo, "Player y Direction: %d\n", g.Player.directionY)
+
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
 
