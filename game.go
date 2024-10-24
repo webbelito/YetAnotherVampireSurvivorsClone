@@ -63,8 +63,8 @@ func (g *Game) SpawnPlayer() {
 	g.Player = NewPlayer("Dracula", 50, 100, 150, 100, 50)
 }
 
-func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2) {
-	g.Projectiles = append(g.Projectiles, NewProjectile(x, y, radius, speed, direction))
+func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {
+	g.Projectiles = append(g.Projectiles, NewProjectile(x, y, radius, speed, direction, color, isHoming))
 }
 
 func (g *Game) DestroyProjectiles() {

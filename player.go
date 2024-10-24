@@ -23,26 +23,30 @@ type PlayerCharacter struct {
 	ShootCooldown   float32
 	LastMeleeTime   float64
 	MeleeCooldown   float32
+	LastHomingTime  float64
+	HomingCooldown  float32
 	Projectiles     *[]*Projectile
 	AttackDirection rl.Vector2
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *PlayerCharacter {
 	return &PlayerCharacter{
-		Name:          n,
-		X:             0,
-		Y:             0,
-		Width:         w,
-		Height:        h,
-		Speed:         s,
-		directionX:    0,
-		directionY:    0,
-		Health:        health,
-		Damage:        d,
-		LastShotTime:  0,
-		ShootCooldown: 1,
-		LastMeleeTime: 0,
-		MeleeCooldown: 2,
+		Name:           n,
+		X:              0,
+		Y:              0,
+		Width:          w,
+		Height:         h,
+		Speed:          s,
+		directionX:     0,
+		directionY:     0,
+		Health:         health,
+		Damage:         d,
+		LastShotTime:   0,
+		ShootCooldown:  1,
+		LastMeleeTime:  0,
+		MeleeCooldown:  2,
+		LastHomingTime: 0,
+		HomingCooldown: 5,
 	}
 }
 
@@ -51,6 +55,7 @@ func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleMovment()
 	p.Fire(g)
 	p.Melee(g)
+	p.ShootHoming(g)
 	p.Render()
 
 	//p.DrawAttackTriangle(p.CalculcateMeleeAttackArea(100, 300))
@@ -150,7 +155,7 @@ func (p *PlayerCharacter) Fire(g *Game) {
 
 		direction = rl.Vector2Normalize(direction)
 
-		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction)
+		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Black, false)
 
 	}
 
@@ -231,4 +236,52 @@ func (p *PlayerCharacter) CalculcateMeleeAttackArea(length float32, baseWidth fl
 
 	return rl.Vector2{X: tipX, Y: tipY}, rl.Vector2{X: baseLeftCornerX, Y: baseLeftCornerY}, rl.Vector2{X: baseRightCornerX, Y: baseRightCornerY}
 
+}
+
+func (p *PlayerCharacter) CanHomingAttack() bool {
+	return (p.LastHomingTime >= float64(p.HomingCooldown))
+}
+
+func (p *PlayerCharacter) ShootHoming(g *Game) {
+
+	// Update the timer
+	p.LastHomingTime += float64(rl.GetFrameTime())
+
+	if p.CanHomingAttack() {
+
+		// Reset the last homing attack time
+		p.LastHomingTime = 0
+
+		direction := rl.Vector2Normalize(rl.Vector2{X: p.X, Y: p.Y})
+
+		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Purple, true)
+
+	}
+
+}
+
+func (p *PlayerCharacter) FindClosestEnemy(g *Game) *Enemy {
+
+	// Set the initial distance to a high value
+	closestDistance := float32(1000000)
+	var closestEnemy *Enemy
+
+	// Find the closest enemy
+	for i := 0; i < len(g.Enemies); i++ {
+
+		if g.Enemies[i].IsDead {
+			continue
+		}
+
+		// Calculate the distance to the enemy
+		distance := rl.Vector2Distance(rl.Vector2{X: p.X, Y: p.Y}, rl.Vector2{X: g.Enemies[i].X, Y: g.Enemies[i].Y})
+
+		// Check if the enemy is closer
+		if distance < closestDistance {
+			closestDistance = distance
+			closestEnemy = g.Enemies[i]
+		}
+	}
+
+	return closestEnemy
 }

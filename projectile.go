@@ -11,13 +11,15 @@ type Projectile struct {
 	Speed     float32
 	Active    bool
 	Direction rl.Vector2
+	Color     rl.Color
+	IsHoming  bool
 }
 
 type ProjectileSpawner interface {
 	SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2)
 }
 
-func NewProjectile(x, y, radius, speed float32, direction rl.Vector2) *Projectile {
+func NewProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) *Projectile {
 
 	return &Projectile{
 		X:         x,
@@ -26,12 +28,22 @@ func NewProjectile(x, y, radius, speed float32, direction rl.Vector2) *Projectil
 		Speed:     speed,
 		Active:    true,
 		Direction: direction,
+		Color:     color,
+		IsHoming:  isHoming,
 	}
 }
 
 func (p *Projectile) Update(g *Game) {
 
 	if p.Active {
+
+		if p.IsHoming {
+			enemy := p.FindClosestEnemy(g.Enemies)
+			if enemy != nil {
+				p.Direction = rl.Vector2Normalize(rl.Vector2Subtract(rl.Vector2{X: enemy.X, Y: enemy.Y}, rl.Vector2{X: p.X, Y: p.Y}))
+			}
+		}
+
 		p.X += p.Direction.X * p.Speed * rl.GetFrameTime()
 		p.Y += p.Direction.Y * p.Speed * rl.GetFrameTime()
 
@@ -54,7 +66,31 @@ func (p *Projectile) Update(g *Game) {
 }
 
 func (p *Projectile) Render() {
-	rl.DrawCircle(int32(p.X), int32(p.Y), p.Radius, rl.Black)
+	rl.DrawCircle(int32(p.X), int32(p.Y), p.Radius, p.Color)
+}
+
+func (p *Projectile) FindClosestEnemy(e []*Enemy) *Enemy {
+	var cEnemy *Enemy
+	var closestDistance float32 = 1000000
+
+	for _, enemy := range e {
+
+		if enemy.IsDead {
+			break
+		}
+
+		distance := rl.Vector2Distance(rl.Vector2{X: p.X, Y: p.Y}, rl.Vector2{X: enemy.X, Y: enemy.Y})
+		if distance < closestDistance {
+			closestDistance = distance
+			cEnemy = enemy
+		}
+	}
+
+	if cEnemy == nil {
+		return nil
+	}
+
+	return cEnemy
 }
 
 func (p *Projectile) CollidesWith(e *Enemy) bool {
