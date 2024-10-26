@@ -4,13 +4,54 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+// Golang enum for PowerUpType
+// PowerUpType represents the type of powerup
+type PowerUpType int
+
+// PowerUpType constants
+const (
+	Heal PowerUpType = iota
+	Speed
+	Damage
+)
+
+// String returns the string representation of the PowerUpType
+func (p PowerUpType) String() string {
+	return [...]string{"Heal", "Speed", "Damage"}[p]
+}
+
 type PowerUp struct {
+	Type              PowerUpType
 	Position          rl.Vector2
 	Active            bool
 	PickedUp          bool
 	Expired           bool
 	TotalDuration     float32
 	RemainingDuration float32
+	Color             rl.Color
+}
+
+func (pu *PowerUp) RandomizePowerUpType() {
+
+	// Do we need a sudo random number generator?
+	powerUpTypeIndex := rl.GetRandomValue(0, 2)
+
+	rl.TraceLog(rl.LogInfo, "PowerUpType Index: %d", powerUpTypeIndex)
+
+	switch powerUpTypeIndex {
+	case 0:
+		pu.Type = Heal
+		pu.Color = rl.Green
+	case 1:
+		pu.Type = Speed
+		pu.Color = rl.Blue
+	case 2:
+		pu.Type = Damage
+		pu.Color = rl.Red
+	default:
+		pu.Type = Heal
+		pu.Color = rl.Green
+	}
 }
 
 func NewPowerUp(d float32) *PowerUp {
@@ -54,7 +95,7 @@ func (pu *PowerUp) RandomizeSpawnPoint() rl.Vector2 {
 }
 
 func (pu *PowerUp) Render() {
-	rl.DrawCircleV(pu.Position, 40, rl.Yellow)
+	rl.DrawCircleV(pu.Position, 40, pu.Color)
 }
 
 func (pu *PowerUp) CollidesWithPlayer(p *PlayerCharacter) bool {

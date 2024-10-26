@@ -125,6 +125,10 @@ func (g *Game) SpawnPowerUp() {
 	// Build a new powerup
 	powerUp := NewPowerUp(5.0)
 
+	// Randomize the PowerUpType
+	powerUp.RandomizePowerUpType()
+
+	// Randomize the spawn point
 	powerUp.Position = powerUp.RandomizeSpawnPoint()
 
 	// Append the new powerup to the game's powerups
