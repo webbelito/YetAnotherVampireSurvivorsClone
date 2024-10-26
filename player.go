@@ -27,6 +27,7 @@ type PlayerCharacter struct {
 	HomingCooldown  float32
 	Projectiles     *[]*Projectile
 	AttackDirection rl.Vector2
+	PowerUps        []*PowerUp
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *PlayerCharacter {
@@ -47,6 +48,7 @@ func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Pl
 		MeleeCooldown:  2,
 		LastHomingTime: 0,
 		HomingCooldown: 5,
+		PowerUps:       make([]*PowerUp, 0),
 	}
 }
 
@@ -113,8 +115,6 @@ func (p *PlayerCharacter) Attack(e Entity) {
 
 func (p *PlayerCharacter) TakeDamage(damage int32) {
 	p.Health -= damage
-
-	//fmt.Println(p.Name, "took", damage, "damage. Remaining health:", p.Health)
 }
 
 func (p *PlayerCharacter) Render() {
@@ -161,6 +161,7 @@ func (p *PlayerCharacter) Fire(g *Game) {
 
 }
 
+// Melee attack
 func (p *PlayerCharacter) CanMeleeAttack() bool {
 	return (p.LastMeleeTime >= float64(p.MeleeCooldown))
 }
@@ -238,6 +239,7 @@ func (p *PlayerCharacter) CalculcateMeleeAttackArea(length float32, baseWidth fl
 
 }
 
+// Homing attack
 func (p *PlayerCharacter) CanHomingAttack() bool {
 	return (p.LastHomingTime >= float64(p.HomingCooldown))
 }
@@ -284,4 +286,11 @@ func (p *PlayerCharacter) FindClosestEnemy(g *Game) *Enemy {
 	}
 
 	return closestEnemy
+}
+
+// Powerups
+func (p *PlayerCharacter) PowerUpUpdate(g *Game) {
+	for i := 0; i < len(p.PowerUps); i++ {
+		p.PowerUps[i].Update(g)
+	}
 }

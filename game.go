@@ -8,12 +8,14 @@ type Game struct {
 	Player      *PlayerCharacter
 	Enemies     []*Enemy
 	Projectiles []*Projectile
+	PowerUps    []*PowerUp
 }
 
 func NewGame() *Game {
 	return &Game{
 		Enemies:     make([]*Enemy, 0),
 		Projectiles: make([]*Projectile, 0),
+		PowerUps:    make([]*PowerUp, 0),
 	}
 }
 
@@ -26,6 +28,11 @@ func (g *Game) Update() {
 	// Spawn an enemy
 	if rl.IsKeyPressed(rl.KeySpace) {
 		g.SpawnEnemy()
+	}
+
+	// Spawn a powerup
+	if rl.IsKeyPressed(rl.KeyP) {
+		g.SpawnPowerUp()
 	}
 
 	// Update player
@@ -51,11 +58,14 @@ func (g *Game) Update() {
 		g.Projectiles[i].Update(g)
 	}
 
-	// Draw a triangle towards the players attack direction
-	// g.Player.DrawAttackTriangle(g.Player.CalculcateMeleeAttackArea(100, 300))
+	// Update powerups
+	for i := 0; i < len(g.PowerUps); i++ {
+		g.PowerUps[i].Update(g)
+	}
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
+	g.DestroyPowerUp()
 
 }
 
@@ -68,6 +78,11 @@ func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2
 }
 
 func (g *Game) DestroyProjectiles() {
+
+	if len(g.Projectiles) == 0 {
+		return
+	}
+
 	i := 0
 
 	for _, p := range g.Projectiles {
@@ -87,6 +102,10 @@ func (g *Game) SpawnEnemy() {
 
 func (g *Game) DestroyEnemy() {
 
+	if len(g.Enemies) == 0 {
+		return
+	}
+
 	i := 0
 
 	for _, e := range g.Enemies {
@@ -98,5 +117,37 @@ func (g *Game) DestroyEnemy() {
 
 	// Truncate the slice to remove dead enemies
 	g.Enemies = g.Enemies[:i]
+
+}
+
+func (g *Game) SpawnPowerUp() {
+
+	// Build a new powerup
+	powerUp := NewPowerUp(5.0)
+
+	powerUp.Position = powerUp.RandomizeSpawnPoint()
+
+	// Append the new powerup to the game's powerups
+	g.PowerUps = append(g.PowerUps, powerUp)
+}
+
+func (g *Game) DestroyPowerUp() {
+
+	if len(g.PowerUps) == 0 {
+		return
+	}
+
+	// Remove the powerup from the game if its is not active and has been picked up
+	i := 0
+
+	for _, pu := range g.PowerUps {
+		if !pu.Expired {
+			g.PowerUps[i] = pu
+			i++
+		}
+	}
+
+	// Truncate the slice to remove inactive powerups
+	g.PowerUps = g.PowerUps[:i]
 
 }
