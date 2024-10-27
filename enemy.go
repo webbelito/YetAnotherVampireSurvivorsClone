@@ -16,6 +16,7 @@ type Enemy struct {
 	Height            int32
 	Texture           rl.Texture2D
 	TextureSourceRect rl.Rectangle
+	TextureBasePos    rl.Vector2
 	Speed             float32
 	SpawnX            float32
 	SpawnY            float32
@@ -33,21 +34,18 @@ type Enemy struct {
 func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d float32) *Enemy {
 
 	e := &Enemy{
-		Name:         n,
-		X:            0,
-		Y:            0,
-		Width:        w,
-		Height:       h,
-		Texture:      t,
-		Health:       health,
-		Damage:       d,
-		IsDead:       false,
-		frameIndex:   0,
-		frameTime:    0.1,
-		frameTimer:   0,
-		totalFrames:  8,
-		framesWidth:  32,
-		framesHeight: 32,
+		Name:       n,
+		X:          0,
+		Y:          0,
+		Width:      w,
+		Height:     h,
+		Texture:    t,
+		Health:     health,
+		Damage:     d,
+		IsDead:     false,
+		frameIndex: 1,
+		frameTime:  0.1,
+		frameTimer: 0,
 	}
 
 	e.RandomizeSpawnPosition()
@@ -55,12 +53,42 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 	// TODO: Create a proper enemy type struct
 	switch n {
 	case "Bat":
-		e.TextureSourceRect = rl.NewRectangle(0, 0, 32, 32)
+
+		//  Texture
+		e.TextureBasePos = rl.NewVector2(0, 0)
+
+		e.TextureSourceRect = rl.NewRectangle(
+			e.TextureBasePos.X,
+			e.TextureSourceRect.Y,
+			float32(e.framesWidth),
+			float32(e.framesHeight),
+		)
+
 		e.Speed = 100
+
+		// Animation
+		e.totalFrames = 8
+		e.framesWidth = 32
+		e.framesHeight = 32
 	case "Pumpkin":
-		e.TextureSourceRect = rl.NewRectangle(0, 32, 32, 32)
+
+		// Texture
+		e.TextureBasePos = rl.NewVector2(0, 32)
+
+		e.TextureSourceRect = rl.NewRectangle(
+			e.TextureBasePos.X,
+			e.TextureSourceRect.Y,
+			float32(e.framesWidth),
+			float32(e.framesHeight),
+		)
+
 		e.Speed = 20
 		e.Health = 200
+
+		// Animation
+		e.totalFrames = 1
+		e.framesWidth = 32
+		e.framesHeight = 32
 	default:
 		rl.TraceLog(rl.LogError, "NewEnemy: Default Case, Unknown enemy type")
 	}
@@ -99,7 +127,7 @@ func (e *Enemy) Render() {
 
 	e.TextureSourceRect = rl.NewRectangle(
 		float32(e.frameIndex*e.framesWidth),
-		0,
+		float32(e.TextureBasePos.Y),
 		float32(e.framesWidth),
 		float32(e.framesHeight),
 	)
