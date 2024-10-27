@@ -21,6 +21,20 @@ func NewGame() *Game {
 
 func (g *Game) Update() {
 
+	// Initialize the atlas
+	/*
+		if g.Atlas.ID == 0 {
+
+			// Load the atlas texture
+			g.Atlas = rl.LoadTexture("assets/images/yavsc-atlast-sheet.png")
+
+			// Check that the atlast loaded correctly
+			if g.Atlas.Width == 0 || g.Atlas.Height == 0 {
+				rl.TraceLog(rl.LogError, "Failed to load the atlas texture")
+			}
+		}
+	*/
+
 	// TODO: Create a better way of spawning the player
 	if g.Player == nil {
 		g.SpawnPlayer()
@@ -32,8 +46,13 @@ func (g *Game) Update() {
 	}
 
 	// Spawn an enemy
+	if rl.IsKeyPressed(rl.KeyB) {
+		g.SpawnBat()
+	}
+
+	// Spawn a pumpkin
 	if rl.IsKeyPressed(rl.KeySpace) {
-		g.SpawnEnemy()
+		g.SpawnPumpkin()
 	}
 
 	// Spawn a powerup
@@ -96,7 +115,7 @@ func (g *Game) Update() {
 }
 
 func (g *Game) SpawnPlayer() {
-	g.Player = NewPlayer("Bill", 50, 100, 150, 100, 50)
+	g.Player = NewPlayer("Bill", 32, 64, 150, 100, 50)
 }
 
 func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {
@@ -122,8 +141,12 @@ func (g *Game) DestroyProjectiles() {
 	g.Projectiles = g.Projectiles[:i]
 }
 
-func (g *Game) SpawnEnemy() {
-	g.Enemies = append(g.Enemies, NewEnemy("Bat", 50, 50, 100, 10, 50))
+func (g *Game) SpawnBat() {
+	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Bat", 32, 32, 10, 50))
+}
+
+func (g *Game) SpawnPumpkin() {
+	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Pumpkin", 32, 32, 20, 50))
 }
 
 func (g *Game) DestroyEnemy() {

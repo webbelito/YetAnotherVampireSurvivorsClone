@@ -19,6 +19,8 @@ type PlayerCharacter struct {
 	Speed              float32
 	directionX         int32
 	directionY         int32
+	Texture            rl.Texture2D
+	TextureSourceRect  rl.Rectangle
 	Health             float32
 	MaxHealth          float32
 	BaseExperience     int32
@@ -48,6 +50,8 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 		Speed:              s,
 		directionX:         0,
 		directionY:         0,
+		Texture:            TextureAtlas,
+		TextureSourceRect:  rl.NewRectangle(0, 64, 32, 64),
 		Health:             health,
 		MaxHealth:          health,
 		BaseExperience:     10,
@@ -176,7 +180,18 @@ func (p *PlayerCharacter) Heal(amount float32) {
 }
 
 func (p *PlayerCharacter) Render() {
-	rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
+
+	//rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
+
+	rl.DrawTexturePro(
+		p.Texture,
+		p.TextureSourceRect,
+		rl.NewRectangle(p.X, p.Y, float32(p.Width), float32(p.Height)),
+		rl.Vector2{X: 16, Y: 32},
+		0,
+		rl.White,
+	)
+
 }
 
 func (p *PlayerCharacter) GetName() string {
