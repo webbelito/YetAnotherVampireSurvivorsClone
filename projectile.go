@@ -51,7 +51,7 @@ func (p *Projectile) Update(g *Game) {
 		for _, enemy := range g.Enemies {
 			if p.CollidesWith(enemy) {
 				p.Active = false
-				enemy.TakeDamage(g.Player.Damage)
+				g.Player.DealDamage(enemy)
 				break
 			}
 		}

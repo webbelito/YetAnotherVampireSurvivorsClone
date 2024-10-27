@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -21,14 +23,17 @@ func (p PowerUpType) String() string {
 }
 
 type PowerUp struct {
-	Type              PowerUpType
-	Position          rl.Vector2
-	Active            bool
-	PickedUp          bool
-	Expired           bool
-	TotalDuration     float32
-	RemainingDuration float32
-	Color             rl.Color
+	Type                     PowerUpType
+	Position                 rl.Vector2
+	Active                   bool
+	PickedUp                 bool
+	Expired                  bool
+	TotalDuration            float32
+	RemainingDuration        float32
+	Color                    rl.Color
+	DamageIncreasePercentage float32
+	SpeedIncreasePercentage  float32
+	HealthIncrease           float32
 }
 
 func (pu *PowerUp) RandomizePowerUpType() {
@@ -36,31 +41,37 @@ func (pu *PowerUp) RandomizePowerUpType() {
 	// Do we need a sudo random number generator?
 	powerUpTypeIndex := rl.GetRandomValue(0, 2)
 
-	rl.TraceLog(rl.LogInfo, "PowerUpType Index: %d", powerUpTypeIndex)
-
+	// TODO: Create specifc structs for each powerup type
 	switch powerUpTypeIndex {
 	case 0:
 		pu.Type = Heal
 		pu.Color = rl.Green
+		pu.TotalDuration = 1
+		pu.HealthIncrease = 10
 	case 1:
 		pu.Type = Speed
 		pu.Color = rl.Blue
+		pu.TotalDuration = 30
+		pu.SpeedIncreasePercentage = 0.75
 	case 2:
 		pu.Type = Damage
 		pu.Color = rl.Red
+		pu.TotalDuration = 10
+		pu.DamageIncreasePercentage = 0.5
 	default:
 		pu.Type = Heal
 		pu.Color = rl.Green
 	}
+
+	rl.TraceLog(rl.LogInfo, "PowerUpType Type: %s", pu.Type)
 }
 
-func NewPowerUp(d float32) *PowerUp {
+func NewPowerUp() *PowerUp {
 
 	return &PowerUp{
-		Active:        false,
-		PickedUp:      false,
-		Expired:       false,
-		TotalDuration: d,
+		Active:   false,
+		PickedUp: false,
+		Expired:  false,
 	}
 }
 
@@ -68,6 +79,16 @@ func (pu *PowerUp) Update(g *Game) {
 
 	// Tick down the remaining duration of the powerup
 	if pu.Active && pu.PickedUp {
+
+		// If the powerup is of type Heal
+		if pu.Type == Heal {
+			g.Player.Heal(10)
+			pu.Expire(g.Player)
+			return
+		}
+		// Heal the player
+		// Expire the powerup
+
 		pu.RemainingDuration -= rl.GetFrameTime()
 
 		if pu.RemainingDuration <= 0 {
@@ -119,6 +140,13 @@ func (pu *PowerUp) Activate(g *Game) {
 	// Add powerup to player
 	g.Player.PowerUps = append(g.Player.PowerUps, pu)
 
+}
+
+func (pu *PowerUp) RenderHUD() {
+	text := fmt.Sprintf("PowerUp: %s Duration: %2.f", pu.Type, pu.RemainingDuration)
+
+	// TODO: Render the list of powerups
+	rl.DrawText(text, 10, 150, 20, rl.Black)
 }
 
 func (pu *PowerUp) Expire(p *PlayerCharacter) {

@@ -1,34 +1,20 @@
 package main
 
-import ( /*"github.com/webbelito/YetAnotherVampireSurvivorsClone/enemy"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/player"
-	"github.com/webbelito/YetAnotherVampireSurvivorsClone/projectile"
-	*/ // 3rd-party library
+import (
 	rl "github.com/gen2brain/raylib-go/raylib"
-	/*
-		"github.com/webbelito/YetAnotherVampireSurvivorsClone/game"
-	*/)
+)
 
 // Window settings
 const SCREEN_WIDTH = 1920
 const SCREEN_HEIGHT = 1080
 const SCREEN_TITLE = "YAVSC - Yet Another Vampire Survivors Clone"
 
-// Player settings
-const PLAYER_WIDTH = 50
-const PLAYER_HEIGHT = 100
-const PLAYER_SPEED = 150
-const PLAYER_HEALTH = 100
-const PLAYER_DAMAGE = 50
-
-// Enemy settings
-const BAT_WIDTH = 50
-const BAT_HEIGHT = 50
-const BAT_SPEED = 50
-const BAT_HEALTH = 50
-const BAT_DAMAGE = 10
-
 func main() {
+
+	// Check if we are in debug mode and set the log level
+	if isDebugMode() {
+		rl.SetTraceLogLevel(rl.LogDebug)
+	}
 
 	// Initialize the game
 	game := NewGame()
@@ -42,9 +28,12 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
+		// TODO: Implement a 2d camera
+
 		rl.BeginDrawing()
 
 		game.Update()
+
 		rl.ClearBackground(rl.RayWhite)
 
 		rl.DrawFPS(10, 10)
@@ -59,4 +48,10 @@ func main() {
 	}
 
 	rl.CloseWindow()
+}
+
+// TODO: Implement a proper debug mode
+func isDebugMode() bool {
+	debug := true
+	return debug
 }

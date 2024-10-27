@@ -17,8 +17,9 @@ type PlayerCharacter struct {
 	Speed           float32
 	directionX      int32
 	directionY      int32
-	Health          int32
-	Damage          int32
+	Health          float32
+	MaxHealth       float32
+	Damage          float32
 	LastShotTime    float64
 	ShootCooldown   float32
 	LastMeleeTime   float64
@@ -30,7 +31,7 @@ type PlayerCharacter struct {
 	PowerUps        []*PowerUp
 }
 
-func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *PlayerCharacter {
+func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32) *PlayerCharacter {
 	return &PlayerCharacter{
 		Name:           n,
 		X:              0,
@@ -41,6 +42,7 @@ func NewPlayer(n string, w int32, h int32, s float32, health int32, d int32) *Pl
 		directionX:     0,
 		directionY:     0,
 		Health:         health,
+		MaxHealth:      health,
 		Damage:         d,
 		LastShotTime:   0,
 		ShootCooldown:  1,
@@ -64,8 +66,20 @@ func (p *PlayerCharacter) Update(g *Game) {
 }
 
 func (p *PlayerCharacter) HandleMovment() {
-	p.X += float32(p.directionX) * p.Speed * rl.GetFrameTime()
-	p.Y += float32(p.directionY) * p.Speed * rl.GetFrameTime()
+
+	totalSpeed := p.Speed
+
+	// Apply powerups
+	for i := 0; i < len(p.PowerUps); i++ {
+
+		if p.PowerUps[i].Type == Speed {
+			// Example 50 += 0.5 * 50 = 75
+			totalSpeed += p.PowerUps[i].SpeedIncreasePercentage * p.Speed
+		}
+	}
+
+	p.X += float32(p.directionX) * totalSpeed * rl.GetFrameTime()
+	p.Y += float32(p.directionY) * totalSpeed * rl.GetFrameTime()
 
 	// Limit player movement to screen width
 	if p.X <= 0 {
@@ -113,8 +127,41 @@ func (p *PlayerCharacter) Attack(e Entity) {
 	e.TakeDamage(p.Damage)
 }
 
-func (p *PlayerCharacter) TakeDamage(damage int32) {
+func (p *PlayerCharacter) DealDamage(e Entity) {
+
+	totalDamage := p.Damage
+
+	// Apply powerups
+	for i := 0; i < len(p.PowerUps); i++ {
+
+		if p.PowerUps[i].Type == Damage {
+			// Example 50 += 0.5 * 50 = 75
+			totalDamage += p.PowerUps[i].DamageIncreasePercentage * p.Damage
+		}
+	}
+
+	e.TakeDamage(totalDamage)
+
+}
+
+func (p *PlayerCharacter) TakeDamage(damage float32) {
 	p.Health -= damage
+}
+
+func (p *PlayerCharacter) Heal(amount float32) {
+
+	// Check if the heal will exceed the max health
+	if p.Health+amount > p.MaxHealth {
+
+		rl.TraceLog(rl.LogDebug, "Healing player to max health")
+
+		p.Health = p.MaxHealth
+		return
+	}
+
+	rl.TraceLog(rl.LogDebug, "Healing player for %f", amount)
+
+	p.Health += amount
 }
 
 func (p *PlayerCharacter) Render() {
@@ -184,7 +231,7 @@ func (p *PlayerCharacter) Melee(g *Game) {
 		for i := 0; i < len(g.Enemies); i++ {
 			if rl.CheckCollisionPointTriangle(rl.Vector2{X: g.Enemies[i].X, Y: g.Enemies[i].Y}, tip, baseLeftCorner, baseRightCorner) {
 				if !g.Enemies[i].IsDead {
-					g.Enemies[i].TakeDamage(p.Damage)
+					p.DealDamage(g.Enemies[i])
 				}
 			}
 

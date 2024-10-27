@@ -21,6 +21,7 @@ func NewGame() *Game {
 
 func (g *Game) Update() {
 
+	// TODO: Create a better way of spawning the player
 	if g.Player == nil {
 		g.SpawnPlayer()
 	}
@@ -62,6 +63,8 @@ func (g *Game) Update() {
 	for i := 0; i < len(g.PowerUps); i++ {
 		g.PowerUps[i].Update(g)
 	}
+
+	// TODO: Render the PowerUp HUD
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
@@ -123,7 +126,7 @@ func (g *Game) DestroyEnemy() {
 func (g *Game) SpawnPowerUp() {
 
 	// Build a new powerup
-	powerUp := NewPowerUp(5.0)
+	powerUp := NewPowerUp()
 
 	// Randomize the PowerUpType
 	powerUp.RandomizePowerUpType()
@@ -133,6 +136,7 @@ func (g *Game) SpawnPowerUp() {
 
 	// Append the new powerup to the game's powerups
 	g.PowerUps = append(g.PowerUps, powerUp)
+
 }
 
 func (g *Game) DestroyPowerUp() {

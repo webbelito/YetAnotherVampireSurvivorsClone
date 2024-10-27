@@ -1,6 +1,8 @@
 package main
 
 type Entity interface {
-	TakeDamage(damage int32)
+	TakeDamage(damage float32)
+	Heal(amount float32)
 	GetPosition() (float32, float32)
+	GetName() string
 }

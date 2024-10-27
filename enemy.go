@@ -21,12 +21,12 @@ type Enemy struct {
 	Speed  float32
 	SpawnX float32
 	SpawnY float32
-	Health int32
-	Damage int32
+	Health float32
+	Damage float32
 	IsDead bool
 }
 
-func NewEnemy(n string, w int32, h int32, s float32, health int32, d int32) *Enemy {
+func NewEnemy(n string, w int32, h int32, s float32, health float32, d float32) *Enemy {
 
 	e := &Enemy{
 		Name:   n,
@@ -98,11 +98,17 @@ func (e *Enemy) GetPosition() (float32, float32) {
 	return e.X, e.Y
 }
 
+func (e *Enemy) GetName() string {
+	return e.Name
+}
+
 func (e *Enemy) Attack(entity Entity) {
 	entity.TakeDamage(e.Damage)
 }
 
-func (e *Enemy) TakeDamage(d int32) {
+func (e *Enemy) TakeDamage(d float32) {
+
+	rl.TraceLog(rl.LogDebug, "%s takes %f damage", e.GetName(), d)
 
 	if e.Health-d <= 0 {
 		e.Die()
@@ -110,11 +116,16 @@ func (e *Enemy) TakeDamage(d int32) {
 	}
 
 	e.Health -= d
-
 }
 
 func (e *Enemy) Die() {
 	e.IsDead = true
+
+	rl.TraceLog(rl.LogDebug, "Enemy %s has died", e.Name)
+}
+
+func (e *Enemy) Heal(amount float32) {
+	e.Health += amount
 }
 
 func CheckCollisionAABB(p Projectile, e *Enemy) bool {
