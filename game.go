@@ -65,6 +65,7 @@ func (g *Game) Update() {
 	}
 
 	// TODO: Render the PowerUp HUD
+	g.RenderPowerUpHUD()
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
@@ -137,6 +138,13 @@ func (g *Game) SpawnPowerUp() {
 	// Append the new powerup to the game's powerups
 	g.PowerUps = append(g.PowerUps, powerUp)
 
+}
+
+// TODO: Replace temporary function to Render PowerUp HUD
+func (g *Game) RenderPowerUpHUD() {
+	for i, pu := range g.Player.PowerUps {
+		pu.RenderHUD(20 * int32(i))
+	}
 }
 
 func (g *Game) DestroyPowerUp() {

@@ -142,11 +142,11 @@ func (pu *PowerUp) Activate(g *Game) {
 
 }
 
-func (pu *PowerUp) RenderHUD() {
+func (pu *PowerUp) RenderHUD(xOffset int32) {
 	text := fmt.Sprintf("PowerUp: %s Duration: %2.f", pu.Type, pu.RemainingDuration)
 
 	// TODO: Render the list of powerups
-	rl.DrawText(text, 10, 150, 20, rl.Black)
+	rl.DrawText(text, 10, 150+xOffset, 20, rl.Black)
 }
 
 func (pu *PowerUp) Expire(p *PlayerCharacter) {
