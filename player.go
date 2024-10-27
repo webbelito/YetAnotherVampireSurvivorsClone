@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -9,48 +11,57 @@ type Player interface {
 }
 
 type PlayerCharacter struct {
-	Name            string
-	X               float32
-	Y               float32
-	Width           int32
-	Height          int32
-	Speed           float32
-	directionX      int32
-	directionY      int32
-	Health          float32
-	MaxHealth       float32
-	Damage          float32
-	LastShotTime    float64
-	ShootCooldown   float32
-	LastMeleeTime   float64
-	MeleeCooldown   float32
-	LastHomingTime  float64
-	HomingCooldown  float32
-	Projectiles     *[]*Projectile
-	AttackDirection rl.Vector2
-	PowerUps        []*PowerUp
+	Name               string
+	X                  float32
+	Y                  float32
+	Width              int32
+	Height             int32
+	Speed              float32
+	directionX         int32
+	directionY         int32
+	Health             float32
+	MaxHealth          float32
+	BaseExperience     int32
+	Experience         int32
+	RequiredExperience int32
+	Level              int32
+	Damage             float32
+	LastShotTime       float64
+	ShootCooldown      float32
+	LastMeleeTime      float64
+	MeleeCooldown      float32
+	LastHomingTime     float64
+	HomingCooldown     float32
+	Projectiles        *[]*Projectile
+	AttackDirection    rl.Vector2
+	PowerUps           []*PowerUp
+	HUD                *HUD
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32) *PlayerCharacter {
 	return &PlayerCharacter{
-		Name:           n,
-		X:              0,
-		Y:              0,
-		Width:          w,
-		Height:         h,
-		Speed:          s,
-		directionX:     0,
-		directionY:     0,
-		Health:         health,
-		MaxHealth:      health,
-		Damage:         d,
-		LastShotTime:   0,
-		ShootCooldown:  1,
-		LastMeleeTime:  0,
-		MeleeCooldown:  2,
-		LastHomingTime: 0,
-		HomingCooldown: 5,
-		PowerUps:       make([]*PowerUp, 0),
+		Name:               n,
+		X:                  float32(rl.GetScreenWidth()) / 2,
+		Y:                  float32(rl.GetScreenHeight()) / 2,
+		Width:              w,
+		Height:             h,
+		Speed:              s,
+		directionX:         0,
+		directionY:         0,
+		Health:             health,
+		MaxHealth:          health,
+		BaseExperience:     10,
+		Experience:         0,
+		RequiredExperience: CalculateXPForLevel(1, 10),
+		Level:              1,
+		Damage:             d,
+		LastShotTime:       0,
+		ShootCooldown:      1,
+		LastMeleeTime:      0,
+		MeleeCooldown:      2,
+		LastHomingTime:     0,
+		HomingCooldown:     5,
+		PowerUps:           make([]*PowerUp, 0),
 	}
 }
 
@@ -340,4 +351,51 @@ func (p *PlayerCharacter) PowerUpUpdate(g *Game) {
 	for i := 0; i < len(p.PowerUps); i++ {
 		p.PowerUps[i].Update(g)
 	}
+}
+
+// Experience
+func (p *PlayerCharacter) GainExperience(amount int32) {
+
+	// Add the experience
+	p.Experience += amount
+
+	// Check if the player leveled up
+	if p.Experience >= p.RequiredExperience {
+		p.LevelUp()
+	}
+}
+
+func (p *PlayerCharacter) LevelUp() {
+
+	baseXP := 10
+
+	// Increase the level
+	p.Level++
+
+	// TODO: Implement level up bonuses
+	/*
+		// Increase the max health
+		p.MaxHealth += 10
+
+		// Increase the damage
+		p.Damage += 5
+
+		// Increase the speed
+		p.Speed += 10
+	*/
+
+	// Reset the experience
+	p.Experience = 0
+
+	// Increase the required experience by 50%
+	p.RequiredExperience = CalculateXPForLevel(p.Level, int32(baseXP))
+
+	// Show the level up message
+	p.HUD.LeveledUp = true
+
+	rl.TraceLog(rl.LogDebug, "Player %s has leveled up to level %d", p.Name, p.Level)
+}
+
+func CalculateXPForLevel(level int32, baseXP int32) int32 {
+	return int32(float64(baseXP) * float64(level) * math.Pow(1.1, float64(level)))
 }

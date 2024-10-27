@@ -26,6 +26,11 @@ func (g *Game) Update() {
 		g.SpawnPlayer()
 	}
 
+	// Initialize the HUD
+	if g.Player.HUD == nil {
+		g.Player.HUD = NewHUD(g.Player)
+	}
+
 	// Spawn an enemy
 	if rl.IsKeyPressed(rl.KeySpace) {
 		g.SpawnEnemy()
@@ -34,6 +39,21 @@ func (g *Game) Update() {
 	// Spawn a powerup
 	if rl.IsKeyPressed(rl.KeyP) {
 		g.SpawnPowerUp()
+	}
+
+	// Player takes damage
+	if rl.IsKeyPressed(rl.KeyK) {
+		g.Player.TakeDamage(10)
+	}
+
+	// Player heals
+	if rl.IsKeyPressed(rl.KeyH) {
+		g.Player.Heal(10)
+	}
+
+	// Player gains experience
+	if rl.IsKeyPressed(rl.KeyE) {
+		g.Player.GainExperience(10)
 	}
 
 	// Update player
@@ -65,6 +85,8 @@ func (g *Game) Update() {
 	}
 
 	// TODO: Render the PowerUp HUD
+	g.Player.HUD.Render()
+
 	g.RenderPowerUpHUD()
 
 	g.DestroyProjectiles()
@@ -74,7 +96,7 @@ func (g *Game) Update() {
 }
 
 func (g *Game) SpawnPlayer() {
-	g.Player = NewPlayer("Dracula", 50, 100, 150, 100, 50)
+	g.Player = NewPlayer("Bill", 50, 100, 150, 100, 50)
 }
 
 func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {

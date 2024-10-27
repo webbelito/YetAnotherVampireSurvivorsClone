@@ -36,7 +36,7 @@ func main() {
 
 		rl.ClearBackground(rl.RayWhite)
 
-		rl.DrawFPS(10, 10)
+		rl.DrawFPS(int32(10), int32(rl.GetScreenHeight()-30))
 
 		// Display title text for 3 seconds
 		if titleDisplayTimer < 3.0 {
