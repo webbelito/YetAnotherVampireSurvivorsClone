@@ -52,7 +52,10 @@ func (g *Game) Update() {
 
 	// Spawn an enemy
 	if rl.IsKeyPressed(rl.KeyB) {
-		g.SpawnBat()
+
+		for i := 0; i < 500; i++ {
+			g.SpawnBat()
+		}
 	}
 
 	// Spawn a pumpkin
@@ -107,6 +110,12 @@ func (g *Game) Update() {
 	for i := 0; i < len(g.PowerUps); i++ {
 		g.PowerUps[i].Update(g)
 	}
+
+	// Mob counter
+	/*
+		mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
+		rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
+	*/
 
 	// TODO: Render the PowerUp HUD
 	g.Player.HUD.Render()

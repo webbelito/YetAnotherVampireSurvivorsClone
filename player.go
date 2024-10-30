@@ -12,72 +12,94 @@ type Player interface {
 }
 
 type PlayerCharacter struct {
-	Name               string
-	X                  float32
-	Y                  float32
-	Width              int32
-	Height             int32
-	Speed              float32
-	directionX         int32
-	directionY         int32
-	Texture            rl.Texture2D
-	TextureSourceRect  rl.Rectangle
-	TextureBasePos     rl.Vector2
-	Health             float32
-	MaxHealth          float32
-	IsDead             bool
-	BaseExperience     int32
-	Experience         int32
-	RequiredExperience int32
-	Level              int32
-	Damage             float32
-	LastShotTime       float64
-	ShootCooldown      float32
-	LastMeleeTime      float64
-	MeleeCooldown      float32
-	LastHomingTime     float64
-	HomingCooldown     float32
-	Projectiles        *[]*Projectile
-	AttackDirection    rl.Vector2
-	PowerUps           []*PowerUp
-	HUD                *HUD
-	frameIndex         int
-	frameTime          float32
-	frameTimer         float32
-	totalFrames        int
-	framesWidth        int
-	framesHeight       int
+	Name                  string
+	X                     float32
+	Y                     float32
+	Width                 int32
+	Height                int32
+	Speed                 float32
+	directionX            int32
+	directionY            int32
+	targetDirection       rl.Vector2
+	Texture               rl.Texture2D
+	TextureSourceRect     rl.Rectangle
+	TextureBasePos        rl.Vector2
+	Health                float32
+	MaxHealth             float32
+	IsDead                bool
+	BaseExperience        int32
+	Experience            int32
+	RequiredExperience    int32
+	Level                 int32
+	Damage                float32
+	LastShotTime          float64
+	ShootCooldown         float32
+	LastMeleeTime         float64
+	MeleeAttackBasePos    rl.Vector2
+	MeleeAttackSourceRect rl.Rectangle
+	MeleeCooldown         float32
+	PlayMeleeAttack       bool
+	LastHomingTime        float64
+	HomingCooldown        float32
+	Projectiles           *[]*Projectile
+	AttackDirection       rl.Vector2
+	PowerUps              []*PowerUp
+	HUD                   *HUD
+
+	// TODO: Implement an animator for playing animations
+	// Idle Animation
+	frameIndex   int
+	frameTime    float32
+	frameTimer   float32
+	totalFrames  int
+	framesWidth  int
+	framesHeight int
+
+	// Melee Animation
+	FrameIndexMelee   int
+	FrameTimeMelee    float32
+	FrameTimerMelee   float32
+	TotalFramesMelee  int
+	FramesWidthMelee  int
+	FramesHeightMelee int
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32) *PlayerCharacter {
 	p := &PlayerCharacter{
-		Name:               n,
-		X:                  float32(rl.GetScreenWidth()) / 2,
-		Y:                  float32(rl.GetScreenHeight()) / 2,
-		Width:              w,
-		Height:             h,
-		Speed:              s,
-		directionX:         0,
-		directionY:         0,
-		Texture:            TextureAtlas,
-		TextureSourceRect:  rl.NewRectangle(0, 64, 32, 64),
-		Health:             health,
-		MaxHealth:          health,
-		BaseExperience:     10,
-		Experience:         0,
-		RequiredExperience: CalculateXPForLevel(1, 10),
-		Level:              1,
-		Damage:             d,
-		LastShotTime:       0,
-		ShootCooldown:      1,
-		LastMeleeTime:      0,
-		MeleeCooldown:      2,
-		LastHomingTime:     0,
-		HomingCooldown:     5,
-		PowerUps:           make([]*PowerUp, 0),
-		frameIndex:         1,
-		frameTime:          0.1,
-		frameTimer:         0,
+		Name:                  n,
+		X:                     float32(rl.GetScreenWidth()) / 2,
+		Y:                     float32(rl.GetScreenHeight()) / 2,
+		Width:                 w,
+		Height:                h,
+		Speed:                 s,
+		directionX:            0,
+		directionY:            0,
+		Texture:               TextureAtlas,
+		TextureSourceRect:     rl.NewRectangle(0, 64, 32, 64),
+		Health:                health,
+		MaxHealth:             health,
+		BaseExperience:        10,
+		Experience:            0,
+		RequiredExperience:    CalculateXPForLevel(1, 10),
+		Level:                 1,
+		Damage:                d,
+		LastShotTime:          0,
+		ShootCooldown:         1,
+		MeleeAttackSourceRect: rl.NewRectangle(0, 254, 32, 64),
+		MeleeAttackBasePos:    rl.NewVector2(32, -32),
+		LastMeleeTime:         0,
+		MeleeCooldown:         2,
+		LastHomingTime:        0,
+		HomingCooldown:        5,
+		PowerUps:              make([]*PowerUp, 0),
+		frameIndex:            1,
+		frameTime:             0.1,
+		frameTimer:            0,
+
+		// Melee Animation
+		FrameIndexMelee: 1,
+		FrameTimeMelee:  0.03,
+		FrameTimerMelee: 0,
 	}
 
 	p.TextureBasePos = rl.NewVector2(0, 64)
@@ -86,6 +108,11 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 	p.totalFrames = 8
 	p.framesWidth = 32
 	p.framesHeight = 64
+
+	// Melee Animation
+	p.TotalFramesMelee = 10
+	p.FramesWidthMelee = 32
+	p.FramesHeightMelee = 64
 
 	p.TextureSourceRect = rl.NewRectangle(
 		p.TextureBasePos.X,
@@ -147,11 +174,11 @@ func (p *PlayerCharacter) HandleInput() {
 	// Handle horizontal movement
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
 		p.directionX = 1
-		p.AttackDirection = rl.Vector2{X: 1, Y: 0}
+		p.targetDirection = rl.Vector2{X: 1, Y: 0}
 		p.TurnPlayerRight()
 	} else if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
 		p.directionX = -1
-		p.AttackDirection = rl.Vector2{X: -1, Y: 0}
+		p.targetDirection = rl.Vector2{X: -1, Y: 0}
 		p.TurnPlayerLeft()
 	} else {
 		p.directionX = 0
@@ -252,11 +279,35 @@ func (p *PlayerCharacter) UpdateAnimation() {
 			p.TextureSourceRect.X = float32(p.frameIndex) * float32(p.framesWidth)
 		}
 	}
+
+	// Melee Attack Animation
+	if p.PlayMeleeAttack {
+
+		// Update the frame timer
+		p.FrameTimerMelee += rl.GetFrameTime()
+
+		if p.FrameTimerMelee >= p.FrameTimeMelee {
+			p.FrameTimerMelee = 0
+			p.FrameIndexMelee++
+
+			if p.FrameIndexMelee >= p.TotalFramesMelee {
+				p.FrameIndexMelee = 1
+				p.PlayMeleeAttack = false
+			}
+
+			p.MeleeAttackSourceRect.X = float32(p.FrameIndexMelee) * float32(p.FramesWidthMelee)
+
+		}
+
+	}
+
 }
 
 func (p *PlayerCharacter) Render() {
 
 	//rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
+
+	// Draw the player character
 
 	rl.DrawTexturePro(
 		p.Texture,
@@ -266,6 +317,29 @@ func (p *PlayerCharacter) Render() {
 		0,
 		rl.White,
 	)
+
+	// Draw the melee attack
+	if p.PlayMeleeAttack {
+
+		// Set the melee attack animation direction
+		if p.targetDirection.X > 0 {
+			p.MeleeAttackSourceRect.Width = 32
+			p.MeleeAttackBasePos.X = 32
+		} else {
+			p.MeleeAttackSourceRect.Width = -32
+			p.MeleeAttackBasePos.X = -32
+		}
+
+		rl.DrawTexturePro(
+			p.Texture,
+			p.MeleeAttackSourceRect,
+			rl.NewRectangle(p.X+p.MeleeAttackBasePos.X, p.Y+p.MeleeAttackBasePos.Y, float32(p.FramesWidthMelee), float32(p.FramesHeightMelee)),
+			rl.Vector2{X: 16, Y: 0},
+			0,
+			rl.White,
+		)
+
+	}
 
 }
 
@@ -324,6 +398,9 @@ func (p *PlayerCharacter) Melee(g *Game) {
 		// Reset the last melee attack time
 		p.LastMeleeTime = 0
 
+		// Set the melee attack flag to true
+		p.PlayMeleeAttack = true
+
 		// Calculate the melee attack area
 		tip, baseLeftCorner, baseRightCorner := p.CalculcateMeleeAttackArea(100, 300)
 
@@ -339,7 +416,7 @@ func (p *PlayerCharacter) Melee(g *Game) {
 		}
 
 		// Draw the attack triangle
-		p.DrawAttackTriangle(tip, baseLeftCorner, baseRightCorner)
+		//p.DrawAttackTriangle(tip, baseLeftCorner, baseRightCorner)
 
 	}
 
@@ -363,10 +440,10 @@ func (p *PlayerCharacter) CalculcateMeleeAttackArea(length float32, baseWidth fl
 	tipY := p.Y + float32(p.Height)/2
 
 	// Normalize the attack direction
-	//normalizedDirection := rl.Vector2Normalize(p.AttackDirection)
+	normalizedDirection := rl.Vector2Normalize(p.targetDirection)
 
 	// Normalize the attack towards the mouse
-	normalizedDirection := rl.Vector2Normalize(rl.Vector2{X: float32(rl.GetMouseX()) - tipX, Y: float32(rl.GetMouseY()) - tipY})
+	//normalizedDirection := rl.Vector2Normalize(rl.Vector2{X: float32(rl.GetMouseX()) - tipX, Y: float32(rl.GetMouseY()) - tipY})
 
 	// Calculate the base center (wide end of the triangle)
 	baseCenterX := tipX + normalizedDirection.X*length
