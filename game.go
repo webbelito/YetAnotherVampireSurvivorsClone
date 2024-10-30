@@ -21,6 +21,11 @@ func NewGame() *Game {
 
 func (g *Game) Update() {
 
+	if g.Player != nil && g.Player.IsDead {
+		rl.DrawText("Game Over", int32(rl.GetScreenWidth())/2-250, int32(rl.GetScreenHeight())/2, 100, rl.Red)
+		return
+	}
+
 	// Initialize the atlas
 	/*
 		if g.Atlas.ID == 0 {
@@ -112,11 +117,6 @@ func (g *Game) Update() {
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
 
-	// TODO: Implement a better way to end the game
-	if g.Player.IsDead {
-		rl.TraceLog(rl.LogDebug, "Player has died, ending the game")
-	}
-
 }
 
 func (g *Game) SpawnPlayer() {
@@ -124,7 +124,7 @@ func (g *Game) SpawnPlayer() {
 }
 
 func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {
-	g.Projectiles = append(g.Projectiles, NewProjectile(x, y, radius, speed, direction, color, isHoming))
+	g.Projectiles = append(g.Projectiles, NewProjectile(TextureAtlas, x, y, radius, speed, direction, color, isHoming))
 }
 
 func (g *Game) DestroyProjectiles() {
@@ -147,11 +147,11 @@ func (g *Game) DestroyProjectiles() {
 }
 
 func (g *Game) SpawnBat() {
-	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Bat", 32, 32, 10, 50))
+	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Bat", 32, 32, 10))
 }
 
 func (g *Game) SpawnPumpkin() {
-	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Pumpkin", 32, 32, 20, 50))
+	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Pumpkin", 32, 32, 20))
 }
 
 func (g *Game) DestroyEnemy() {

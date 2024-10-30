@@ -5,32 +5,46 @@ import (
 )
 
 type Projectile struct {
-	X         float32
-	Y         float32
-	Radius    float32
-	Speed     float32
-	Active    bool
-	Direction rl.Vector2
-	Color     rl.Color
-	IsHoming  bool
+	X                 float32
+	Y                 float32
+	Radius            float32
+	Texture           rl.Texture2D
+	TextureSourceRect rl.Rectangle
+	TextureBasePos    rl.Vector2
+	Speed             float32
+	Active            bool
+	Direction         rl.Vector2
+	Color             rl.Color
+	IsHoming          bool
 }
 
 type ProjectileSpawner interface {
 	SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2)
 }
 
-func NewProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) *Projectile {
+func NewProjectile(t rl.Texture2D, x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) *Projectile {
 
-	return &Projectile{
+	p := Projectile{
 		X:         x,
 		Y:         y,
 		Radius:    radius,
+		Texture:   t,
 		Speed:     speed,
 		Active:    true,
 		Direction: direction,
 		Color:     color,
 		IsHoming:  isHoming,
 	}
+
+	switch isHoming {
+	case true:
+		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 224, Width: 32, Height: 32}
+
+	case false:
+		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 192, Width: 32, Height: 32}
+	}
+
+	return &p
 }
 
 func (p *Projectile) Update(g *Game) {
@@ -66,7 +80,14 @@ func (p *Projectile) Update(g *Game) {
 }
 
 func (p *Projectile) Render() {
-	rl.DrawCircle(int32(p.X), int32(p.Y), p.Radius, p.Color)
+	rl.DrawTexturePro(
+		p.Texture,
+		p.TextureSourceRect,
+		rl.NewRectangle(p.X, p.Y, 32, 32),
+		rl.Vector2{X: 32, Y: 32},
+		0,
+		rl.White,
+	)
 }
 
 func (p *Projectile) FindClosestEnemy(e []*Enemy) *Enemy {

@@ -34,7 +34,7 @@ type Enemy struct {
 	framesHeight      int
 }
 
-func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d float32) *Enemy {
+func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy {
 
 	e := &Enemy{
 		Name:           n,
@@ -44,7 +44,6 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 		Height:         h,
 		Texture:        t,
 		Health:         health,
-		Damage:         d,
 		LastAttackTime: 0,
 		AttackCooldown: 1,
 		IsDead:         false,
@@ -69,8 +68,9 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 			float32(e.framesHeight),
 		)
 
+		e.Damage = 5
 		e.Speed = 100
-		e.AttackRange = 10
+		e.AttackRange = 15
 
 		// Animation
 		e.totalFrames = 8
@@ -88,6 +88,8 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 			float32(e.framesHeight),
 		)
 
+		e.AttackRange = 20
+		e.Damage = 25
 		e.Speed = 20
 		e.Health = 200
 
@@ -159,8 +161,13 @@ func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {
 	if e.IsPlayerInAttackRange(p) {
 		e.Attack(p)
 
-		// Stop moving
-		return
+		// Calculate the distance between the player and the enemy
+		distance := rl.Vector2Distance(rl.NewVector2(e.X, e.Y), rl.NewVector2(p.X, p.Y))
+
+		// If we're close enough to the player, don't move
+		if distance < e.AttackRange-10 {
+			return
+		}
 	}
 
 	if e.X < posX {
