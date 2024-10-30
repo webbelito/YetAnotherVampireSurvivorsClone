@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -12,6 +14,7 @@ type Enemy struct {
 	Name              string
 	X                 float32
 	Y                 float32
+	Radius            float32
 	Width             int32
 	Height            int32
 	Texture           rl.Texture2D
@@ -71,6 +74,8 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		e.Damage = 5
 		e.Speed = 100
 		e.AttackRange = 15
+
+		e.Radius = 16
 
 		// Animation
 		e.totalFrames = 8
@@ -151,6 +156,60 @@ func (e *Enemy) Render() {
 
 func (e *Enemy) Spawn() {
 	e.RandomizeSpawnPosition()
+}
+
+// TODO: Implement a better way of handling enemy collisions
+// This function is O(n^2) and should be optimized
+// Look at the QuadTree data structure or other spatial partitioning algorithms
+func ResolveEnemyCollisions(g *Game) {
+
+	for i := 0; i < len(g.Enemies); i++ {
+		for j := i + 1; j < len(g.Enemies); j++ {
+			e1 := g.Enemies[i]
+			e2 := g.Enemies[j]
+
+			// Calculate the squared distance to avoid using the square root
+			distanceX := e1.X - e2.X
+			distanceY := e1.Y - e2.Y
+			distanceSquared := distanceX*distanceX + distanceY*distanceY
+			minDistance := e1.Radius + e2.Radius
+			minDistanceSquared := minDistance * minDistance
+
+			// Only proceed if the enemies are colliding
+			if distanceSquared < minDistanceSquared {
+
+				// Compute distance and overlap
+				distance := float32(math.Sqrt(float64(distanceSquared)))
+				overlap := (minDistance - distance) / 2
+
+				// Normalize the separation vector to get separation
+				separation := rl.Vector2{
+					X: (distanceX / distance) * overlap,
+					Y: (distanceY / distance) * overlap,
+				}
+
+				// Move the enemy away from the collision point
+				e1.X += separation.X
+				e1.Y += separation.Y
+				e2.X -= separation.X
+				e2.Y -= separation.Y
+
+			}
+		}
+	}
+}
+
+func CheckCollision(e1, e2 *Enemy) bool {
+	distanceX := e1.X - e2.X
+	distanceY := e1.Y - e2.Y
+
+	distanceSquared := distanceX*distanceX + distanceY*distanceY
+	minDistance := e1.Radius + e2.Radius
+
+	minDistanceSquared := minDistance * minDistance
+
+	return distanceSquared < minDistanceSquared
+
 }
 
 func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {

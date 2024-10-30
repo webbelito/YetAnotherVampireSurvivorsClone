@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -53,9 +55,11 @@ func (g *Game) Update() {
 	// Spawn an enemy
 	if rl.IsKeyPressed(rl.KeyB) {
 
-		for i := 0; i < 500; i++ {
+		for i := 0; i < 24; i++ {
 			g.SpawnBat()
 		}
+
+		g.SpawnBat()
 	}
 
 	// Spawn a pumpkin
@@ -112,10 +116,12 @@ func (g *Game) Update() {
 	}
 
 	// Mob counter
-	/*
-		mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
-		rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
-	*/
+
+	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
+	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
+
+	// Resolve collisions
+	ResolveEnemyCollisions(g)
 
 	// TODO: Render the PowerUp HUD
 	g.Player.HUD.Render()
