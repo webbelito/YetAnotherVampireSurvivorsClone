@@ -184,9 +184,30 @@ func ResolveEnemyCollisions(g *Game) {
 
 				// Normalize the separation vector to get separation
 				separation := rl.Vector2{
-					X: (distanceX / distance) * overlap,
-					Y: (distanceY / distance) * overlap,
+					X: overlap * distanceX / distance,
+					Y: overlap * distanceY / distance,
 				}
+
+				// TODO: Tobbe calcs
+				/*
+					overlapX := minDistance - float32(math.Abs(float64(distanceX)))
+					overlapY := minDistance - float32(math.Abs(float64(distanceY)))
+
+					// Normalize the separation vector to get separation
+					separation := rl.Vector2{
+						X: overlapX / 2,
+						Y: overlapY / 2,
+					}
+
+					// If distance is more than 0, set the serparation to a positive value
+					if distanceX < 0 {
+						separation.X = -separation.X
+					}
+
+					if distanceY < 0 {
+						separation.Y = -separation.Y
+					}
+				*/
 
 				// Move the enemy away from the collision point
 				e1.X += separation.X

@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+const FixedUpdateRate float32 = 60.0
+
 type Game struct {
-	Player      *PlayerCharacter
-	Level       *Level
-	Camera      rl.Camera2D
-	Enemies     []*Enemy
-	Projectiles []*Projectile
-	PowerUps    []*PowerUp
+	Player          *PlayerCharacter
+	Level           *Level
+	Camera          rl.Camera2D
+	Enemies         []*Enemy
+	Projectiles     []*Projectile
+	PowerUps        []*PowerUp
+	FixedDeltaTime  float32
+	LastFixedUpdate time.Time
 }
 
 func NewGame() *Game {
@@ -20,16 +25,16 @@ func NewGame() *Game {
 	grid := []string{
 		"############################################################",
 		"#..........................................................#",
-		"#.......###...............###...............###............#",
-		"#.......###...............###...............###............#",
+		"#........#.........................................#.......#",
 		"#..........................................................#",
 		"#..........................................................#",
-		"#.......###...............###...............###............#",
-		"#.......###...............###...............###............#",
+		"#..........................................................#",
+		"#........#.........................................#.......#",
 		"#..........................................................#",
 		"#..........................................................#",
-		"#.......###...............###...............###............#",
-		"#.......###...............###...............###............#",
+		"#..........................................................#",
+		"#........#.........................................#.......#",
+		"#..........................................................#",
 		"#..........................................................#",
 		"############################################################",
 	}
@@ -49,14 +54,19 @@ func NewGame() *Game {
 	}
 
 	return &Game{
-		Player:      nil,
-		Level:       level,
-		Camera:      camera,
-		Enemies:     make([]*Enemy, 0),
-		Projectiles: make([]*Projectile, 0),
-		PowerUps:    make([]*PowerUp, 0),
+		Player:          nil,
+		Level:           level,
+		Camera:          camera,
+		Enemies:         make([]*Enemy, 0),
+		Projectiles:     make([]*Projectile, 0),
+		PowerUps:        make([]*PowerUp, 0),
+		FixedDeltaTime:  1.0 / FixedUpdateRate,
+		LastFixedUpdate: time.Now(),
 	}
 }
+
+// TODO: Remove this with a proper way to handle frame updates
+var fixedFrameCounter int
 
 func (g *Game) Update() {
 
@@ -64,20 +74,6 @@ func (g *Game) Update() {
 		rl.DrawText("Game Over", int32(rl.GetScreenWidth())/2-250, int32(rl.GetScreenHeight())/2, 100, rl.Red)
 		return
 	}
-
-	// Initialize the atlas
-	/*
-		if g.Atlas.ID == 0 {
-
-			// Load the atlas texture
-			g.Atlas = rl.LoadTexture("assets/images/yavsc-atlast-sheet.png")
-
-			// Check that the atlast loaded correctly
-			if g.Atlas.Width == 0 || g.Atlas.Height == 0 {
-				rl.TraceLog(rl.LogError, "Failed to load the atlas texture")
-			}
-		}
-	*/
 
 	// TODO: Create a better way of spawning the player
 	if g.Player == nil {
@@ -152,9 +148,6 @@ func (g *Game) Update() {
 		g.PowerUps[i].Update(g)
 	}
 
-	// Resolve collisions
-	ResolveEnemyCollisions(g)
-
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
@@ -163,6 +156,16 @@ func (g *Game) Update() {
 	g.Camera.Target = rl.Vector2{
 		X: g.Player.X,
 		Y: g.Player.Y,
+	}
+
+}
+
+func (g *Game) FixedUpdate() {
+	fixedFrameCounter++
+
+	// Resolve collisions every 3rd frame
+	if fixedFrameCounter%3 == 0 {
+		ResolveEnemyCollisions(g)
 	}
 
 }
@@ -189,12 +192,23 @@ func (g *Game) Render() {
 
 func (g *Game) Run() {
 	for !rl.WindowShouldClose() {
+
+		now := time.Now()
+		deltaTime := time.Until(now).Seconds()
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
 		rl.BeginMode2D(g.Camera)
 
 		g.Update()
+
+		for deltaTime >= float64(g.FixedDeltaTime) {
+			g.FixedUpdate()
+			g.LastFixedUpdate = now
+			deltaTime -= float64(g.FixedDeltaTime)
+		}
+
 		g.Render()
 
 		rl.EndMode2D()
@@ -203,6 +217,9 @@ func (g *Game) Run() {
 		g.Player.HUD.Render()
 		g.RenderMobsCounter()
 		g.RenderPowerUpHUD()
+
+		// Draw the FPS
+		rl.DrawFPS(10, int32(rl.GetScreenHeight()-20))
 
 		rl.EndDrawing()
 	}
