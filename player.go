@@ -130,8 +130,8 @@ func (p *PlayerCharacter) Update(g *Game) {
 	p.Fire(g)
 	p.Melee(g)
 	p.ShootHoming(g)
-	p.UpdateAnimation()
-	p.Render()
+	//p.UpdateAnimation()
+	//p.Render()
 
 	//p.DrawAttackTriangle(p.CalculcateMeleeAttackArea(100, 300))
 }

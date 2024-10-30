@@ -9,6 +9,7 @@ import (
 type Game struct {
 	Player      *PlayerCharacter
 	Level       *Level
+	Camera      rl.Camera2D
 	Enemies     []*Enemy
 	Projectiles []*Projectile
 	PowerUps    []*PowerUp
@@ -34,10 +35,23 @@ func NewGame() *Game {
 	}
 
 	level := NewLevel(grid)
+	camera := rl.Camera2D{
+		Offset: rl.Vector2{
+			X: float32(rl.GetScreenWidth()) / 2,
+			Y: float32(rl.GetScreenHeight()) / 2,
+		},
+		Target: rl.Vector2{
+			X: float32(rl.GetScreenWidth()) / 2,
+			Y: float32(rl.GetScreenHeight()) / 2,
+		},
+		Rotation: 0,
+		Zoom:     1,
+	}
 
 	return &Game{
 		Player:      nil,
 		Level:       level,
+		Camera:      camera,
 		Enemies:     make([]*Enemy, 0),
 		Projectiles: make([]*Projectile, 0),
 		PowerUps:    make([]*PowerUp, 0),
@@ -145,17 +159,32 @@ func (g *Game) Update() {
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
 
+	// Update the camera
+	g.Camera.Target = rl.Vector2{
+		X: g.Player.X,
+		Y: g.Player.Y,
+	}
+
 }
 
 func (g *Game) Render() {
+	// Level stuffs here
 	g.Level.Render()
-	g.Player.HUD.Render()
-	g.RenderPowerUpHUD()
 
-	// Mob counter
+	// Player stuffs here
+	g.Player.UpdateAnimation()
+	g.Player.Render()
 
-	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
-	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
+	// Enemy stuffs here
+	for _, e := range g.Enemies {
+		e.UpdateAnimation()
+		e.Render()
+	}
+
+	// Projectile stuffs here
+	for _, p := range g.Projectiles {
+		p.Render()
+	}
 }
 
 func (g *Game) Run() {
@@ -163,8 +192,17 @@ func (g *Game) Run() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
+		rl.BeginMode2D(g.Camera)
+
 		g.Update()
 		g.Render()
+
+		rl.EndMode2D()
+
+		// HUD Stuffs Here
+		g.Player.HUD.Render()
+		g.RenderMobsCounter()
+		g.RenderPowerUpHUD()
 
 		rl.EndDrawing()
 	}
@@ -246,6 +284,11 @@ func (g *Game) RenderPowerUpHUD() {
 	for i, pu := range g.Player.PowerUps {
 		pu.RenderHUD(20 * int32(i))
 	}
+}
+
+func (g *Game) RenderMobsCounter() {
+	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
+	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
 }
 
 func (g *Game) DestroyPowerUp() {
