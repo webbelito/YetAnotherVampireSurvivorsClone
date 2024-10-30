@@ -35,30 +35,34 @@ func main() {
 	game := NewGame()
 
 	// Random timer to despawn title text
-	titleDisplayTimer := float32(0.0)
+	//titleDisplayTimer := float32(0.0)
 
 	rl.SetTargetFPS(180)
 
-	for !rl.WindowShouldClose() {
+	game.Run()
 
-		// TODO: Implement a 2d camera
+	/*
+		for !rl.WindowShouldClose() {
 
-		rl.BeginDrawing()
+			// TODO: Implement a 2d camera
 
-		game.Update()
+			rl.BeginDrawing()
 
-		rl.ClearBackground(rl.RayWhite)
+			game.Update()
 
-		rl.DrawFPS(int32(10), int32(rl.GetScreenHeight()-30))
+			rl.ClearBackground(rl.RayWhite)
 
-		// Display title text for 3 seconds
-		if titleDisplayTimer < 3.0 {
-			titleDisplayTimer = titleDisplayTimer + rl.GetFrameTime()
-			rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
+			rl.DrawFPS(int32(10), int32(rl.GetScreenHeight()-30))
+
+			// Display title text for 3 seconds
+			if titleDisplayTimer < 3.0 {
+				titleDisplayTimer = titleDisplayTimer + rl.GetFrameTime()
+				rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
+			}
+
+			rl.EndDrawing()
 		}
-
-		rl.EndDrawing()
-	}
+	*/
 }
 
 // TODO: Implement a proper debug mode

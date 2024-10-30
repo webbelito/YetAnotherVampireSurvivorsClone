@@ -8,13 +8,36 @@ import (
 
 type Game struct {
 	Player      *PlayerCharacter
+	Level       *Level
 	Enemies     []*Enemy
 	Projectiles []*Projectile
 	PowerUps    []*PowerUp
 }
 
 func NewGame() *Game {
+
+	grid := []string{
+		"############################################################",
+		"#..........................................................#",
+		"#.......###...............###...............###............#",
+		"#.......###...............###...............###............#",
+		"#..........................................................#",
+		"#..........................................................#",
+		"#.......###...............###...............###............#",
+		"#.......###...............###...............###............#",
+		"#..........................................................#",
+		"#..........................................................#",
+		"#.......###...............###...............###............#",
+		"#.......###...............###...............###............#",
+		"#..........................................................#",
+		"############################################################",
+	}
+
+	level := NewLevel(grid)
+
 	return &Game{
+		Player:      nil,
+		Level:       level,
 		Enemies:     make([]*Enemy, 0),
 		Projectiles: make([]*Projectile, 0),
 		PowerUps:    make([]*PowerUp, 0),
@@ -115,23 +138,36 @@ func (g *Game) Update() {
 		g.PowerUps[i].Update(g)
 	}
 
-	// Mob counter
-
-	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
-	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
-
 	// Resolve collisions
 	ResolveEnemyCollisions(g)
-
-	// TODO: Render the PowerUp HUD
-	g.Player.HUD.Render()
-
-	g.RenderPowerUpHUD()
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
 
+}
+
+func (g *Game) Render() {
+	g.Level.Render()
+	g.Player.HUD.Render()
+	g.RenderPowerUpHUD()
+
+	// Mob counter
+
+	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
+	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
+}
+
+func (g *Game) Run() {
+	for !rl.WindowShouldClose() {
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.RayWhite)
+
+		g.Update()
+		g.Render()
+
+		rl.EndDrawing()
+	}
 }
 
 func (g *Game) SpawnPlayer() {
