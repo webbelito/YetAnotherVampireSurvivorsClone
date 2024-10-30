@@ -112,6 +112,11 @@ func (g *Game) Update() {
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
 
+	// TODO: Implement a better way to end the game
+	if g.Player.IsDead {
+		rl.TraceLog(rl.LogDebug, "Player has died, ending the game")
+	}
+
 }
 
 func (g *Game) SpawnPlayer() {

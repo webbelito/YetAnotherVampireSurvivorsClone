@@ -22,6 +22,9 @@ type Enemy struct {
 	SpawnY            float32
 	Health            float32
 	Damage            float32
+	LastAttackTime    float32
+	AttackCooldown    float32
+	AttackRange       float32
 	IsDead            bool
 	frameIndex        int
 	frameTime         float32
@@ -34,18 +37,20 @@ type Enemy struct {
 func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d float32) *Enemy {
 
 	e := &Enemy{
-		Name:       n,
-		X:          0,
-		Y:          0,
-		Width:      w,
-		Height:     h,
-		Texture:    t,
-		Health:     health,
-		Damage:     d,
-		IsDead:     false,
-		frameIndex: 1,
-		frameTime:  0.1,
-		frameTimer: 0,
+		Name:           n,
+		X:              0,
+		Y:              0,
+		Width:          w,
+		Height:         h,
+		Texture:        t,
+		Health:         health,
+		Damage:         d,
+		LastAttackTime: 0,
+		AttackCooldown: 1,
+		IsDead:         false,
+		frameIndex:     1,
+		frameTime:      0.1,
+		frameTimer:     0,
 	}
 
 	e.RandomizeSpawnPosition()
@@ -65,6 +70,7 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 		)
 
 		e.Speed = 100
+		e.AttackRange = 10
 
 		// Animation
 		e.totalFrames = 8
@@ -97,10 +103,9 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32, d floa
 
 }
 
-func (e *Enemy) Update(target Player) {
-	playerPosX, playerPosY := target.GetPosition()
+func (e *Enemy) Update(p *PlayerCharacter) {
 
-	e.MoveTowardsPlayer(playerPosX, playerPosY)
+	e.MoveTowardsPlayer(p)
 
 	e.UpdateAnimation()
 
@@ -146,7 +151,17 @@ func (e *Enemy) Spawn() {
 	e.RandomizeSpawnPosition()
 }
 
-func (e *Enemy) MoveTowardsPlayer(posX, posY float32) {
+func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {
+
+	posX, posY := p.GetPosition()
+
+	// Check if we're in range of the player to attack
+	if e.IsPlayerInAttackRange(p) {
+		e.Attack(p)
+
+		// Stop moving
+		return
+	}
 
 	if e.X < posX {
 		e.X += 1 * e.Speed * rl.GetFrameTime()
@@ -159,6 +174,7 @@ func (e *Enemy) MoveTowardsPlayer(posX, posY float32) {
 	} else if e.Y > posY {
 		e.Y -= 1 * e.Speed * rl.GetFrameTime()
 	}
+
 }
 
 func (e *Enemy) RandomizeSpawnPosition() {
@@ -187,8 +203,38 @@ func (e *Enemy) GetName() string {
 	return e.Name
 }
 
+func (e *Enemy) IsPlayerInAttackRange(p *PlayerCharacter) bool {
+
+	return rl.CheckCollisionCircleRec(
+		rl.Vector2{X: e.X, Y: e.Y},
+		e.AttackRange,
+		rl.NewRectangle(p.X, p.Y, 32, 32),
+	)
+}
+
+func (e *Enemy) CanMeleeAttack() bool {
+	return (e.LastAttackTime >= e.AttackCooldown)
+}
+
 func (e *Enemy) Attack(entity Entity) {
-	entity.TakeDamage(e.Damage)
+
+	// Update the last attack time
+	e.LastAttackTime += rl.GetFrameTime()
+
+	if e.CanMeleeAttack() {
+
+		// Check if the entity is a player
+		if player, ok := entity.(*PlayerCharacter); ok {
+			player.TakeDamage(e.Damage)
+
+			rl.TraceLog(rl.LogDebug, "Enemy %s is attacking %s", e.Name, entity.GetName())
+
+		}
+
+		// Reset the attack timer
+		e.LastAttackTime = 0
+	}
+
 }
 
 func (e *Enemy) TakeDamage(d float32) {

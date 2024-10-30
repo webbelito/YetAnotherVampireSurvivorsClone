@@ -8,6 +8,7 @@ import (
 
 type Player interface {
 	GetPosition() (float32, float32)
+	GetName() string
 }
 
 type PlayerCharacter struct {
@@ -21,8 +22,10 @@ type PlayerCharacter struct {
 	directionY         int32
 	Texture            rl.Texture2D
 	TextureSourceRect  rl.Rectangle
+	TextureBasePos     rl.Vector2
 	Health             float32
 	MaxHealth          float32
+	IsDead             bool
 	BaseExperience     int32
 	Experience         int32
 	RequiredExperience int32
@@ -38,10 +41,16 @@ type PlayerCharacter struct {
 	AttackDirection    rl.Vector2
 	PowerUps           []*PowerUp
 	HUD                *HUD
+	frameIndex         int
+	frameTime          float32
+	frameTimer         float32
+	totalFrames        int
+	framesWidth        int
+	framesHeight       int
 }
 
 func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32) *PlayerCharacter {
-	return &PlayerCharacter{
+	p := &PlayerCharacter{
 		Name:               n,
 		X:                  float32(rl.GetScreenWidth()) / 2,
 		Y:                  float32(rl.GetScreenHeight()) / 2,
@@ -66,7 +75,26 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 		LastHomingTime:     0,
 		HomingCooldown:     5,
 		PowerUps:           make([]*PowerUp, 0),
+		frameIndex:         1,
+		frameTime:          0.1,
+		frameTimer:         0,
 	}
+
+	p.TextureBasePos = rl.NewVector2(0, 64)
+
+	// Animation stuffs
+	p.totalFrames = 8
+	p.framesWidth = 32
+	p.framesHeight = 64
+
+	p.TextureSourceRect = rl.NewRectangle(
+		p.TextureBasePos.X,
+		p.TextureBasePos.Y,
+		float32(p.framesWidth),
+		float32(p.framesHeight),
+	)
+
+	return p
 }
 
 func (p *PlayerCharacter) Update(g *Game) {
@@ -75,6 +103,7 @@ func (p *PlayerCharacter) Update(g *Game) {
 	p.Fire(g)
 	p.Melee(g)
 	p.ShootHoming(g)
+	p.UpdateAnimation()
 	p.Render()
 
 	//p.DrawAttackTriangle(p.CalculcateMeleeAttackArea(100, 300))
@@ -119,9 +148,11 @@ func (p *PlayerCharacter) HandleInput() {
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
 		p.directionX = 1
 		p.AttackDirection = rl.Vector2{X: 1, Y: 0}
+		p.TurnPlayerRight()
 	} else if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
 		p.directionX = -1
 		p.AttackDirection = rl.Vector2{X: -1, Y: 0}
+		p.TurnPlayerLeft()
 	} else {
 		p.directionX = 0
 	}
@@ -136,6 +167,14 @@ func (p *PlayerCharacter) HandleInput() {
 	} else {
 		p.directionY = 0
 	}
+}
+
+func (p *PlayerCharacter) TurnPlayerRight() {
+	p.TextureSourceRect = rl.NewRectangle(0, 64, 32, 64)
+}
+
+func (p *PlayerCharacter) TurnPlayerLeft() {
+	p.TextureSourceRect = rl.NewRectangle(0, 64, -32, 64)
 }
 
 func (p *PlayerCharacter) Attack(e Entity) {
@@ -160,7 +199,22 @@ func (p *PlayerCharacter) DealDamage(e Entity) {
 }
 
 func (p *PlayerCharacter) TakeDamage(damage float32) {
+
+	rl.TraceLog(rl.LogDebug, "%s takes %f damage", p.Name, damage)
+
+	if p.Health-damage <= 0 {
+		p.Die()
+		return
+	}
+
 	p.Health -= damage
+
+}
+
+func (p *PlayerCharacter) Die() {
+	rl.TraceLog(rl.LogDebug, "Player %s has died", p.Name)
+
+	p.IsDead = true
 }
 
 func (p *PlayerCharacter) Heal(amount float32) {
@@ -177,6 +231,27 @@ func (p *PlayerCharacter) Heal(amount float32) {
 	rl.TraceLog(rl.LogDebug, "Healing player for %f", amount)
 
 	p.Health += amount
+}
+
+func (p *PlayerCharacter) UpdateAnimation() {
+
+	// Idle Animation
+	if p.directionX == 0 && p.directionY == 0 {
+
+		// Update the frame timer
+		p.frameTimer += rl.GetFrameTime()
+
+		if p.frameTimer >= p.frameTime {
+			p.frameTimer = 0
+			p.frameIndex++
+
+			if p.frameIndex >= p.totalFrames {
+				p.frameIndex = 1
+			}
+
+			p.TextureSourceRect.X = float32(p.frameIndex) * float32(p.framesWidth)
+		}
+	}
 }
 
 func (p *PlayerCharacter) Render() {

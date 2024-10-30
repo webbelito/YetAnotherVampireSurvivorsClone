@@ -111,6 +111,10 @@ func (h *HUD) RenderLeveledUp() {
 	rl.DrawText(levelUpText, textXPosition, textYPosition, 64, rl.Yellow)
 
 	if h.LeveledUpDuration <= 0 {
+
+		// Reset the level up text
 		h.LeveledUp = false
+		h.LeveledUpDuration = 2
+
 	}
 }
