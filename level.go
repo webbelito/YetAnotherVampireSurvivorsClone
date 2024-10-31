@@ -23,7 +23,7 @@ var tileMap = map[rune]int{
 	'[': LeftWall,
 	']': RightWall,
 	'^': TopWall,
-	'v': BottomWall,
+	'_': BottomWall,
 	'@': BlockWall,
 	'.': Grass,
 }
