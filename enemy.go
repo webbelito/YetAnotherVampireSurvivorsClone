@@ -202,27 +202,6 @@ func ResolveEnemyCollisions(g *Game) {
 					Y: overlap * distanceY / distance,
 				}
 
-				// TODO: Tobbe calcs
-				/*
-					overlapX := minDistance - float32(math.Abs(float64(distanceX)))
-					overlapY := minDistance - float32(math.Abs(float64(distanceY)))
-
-					// Normalize the separation vector to get separation
-					separation := rl.Vector2{
-						X: overlapX / 2,
-						Y: overlapY / 2,
-					}
-
-					// If distance is more than 0, set the serparation to a positive value
-					if distanceX < 0 {
-						separation.X = -separation.X
-					}
-
-					if distanceY < 0 {
-						separation.Y = -separation.Y
-					}
-				*/
-
 				// Move the enemy away from the collision point
 				e1.X += separation.X
 				e1.Y += separation.Y
@@ -232,19 +211,6 @@ func ResolveEnemyCollisions(g *Game) {
 			}
 		}
 	}
-}
-
-func CheckCollision(e1, e2 *Enemy) bool {
-	distanceX := e1.X - e2.X
-	distanceY := e1.Y - e2.Y
-
-	distanceSquared := distanceX*distanceX + distanceY*distanceY
-	minDistance := e1.Radius + e2.Radius
-
-	minDistanceSquared := minDistance * minDistance
-
-	return distanceSquared < minDistanceSquared
-
 }
 
 func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {
@@ -259,11 +225,13 @@ func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {
 		distance := rl.Vector2Distance(rl.NewVector2(e.X, e.Y), rl.NewVector2(p.X, p.Y))
 
 		// If we're close enough to the player, don't move
+		// TODO: Replace the hardcoded value with a variable
 		if distance < e.AttackRange-10 {
 			return
 		}
 	}
 
+	// Move towards the player on the X and Y axis
 	if e.X < posX {
 		e.X += 1 * e.Speed * rl.GetFrameTime()
 	} else if e.X > posX {

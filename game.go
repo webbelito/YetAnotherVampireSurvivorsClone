@@ -245,6 +245,7 @@ func (g *Game) Run() {
 		rl.EndMode2D()
 
 		// HUD Stuffs Here
+		// TODO: Separate the HUD from the PlayerCharacter
 		g.Player.HUD.Render()
 		g.RenderMobsCounter()
 		g.RenderPowerUpHUD()
