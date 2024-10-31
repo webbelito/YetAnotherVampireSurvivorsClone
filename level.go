@@ -175,10 +175,12 @@ func (l *Level) Render() {
 	}
 }
 
-func (l *Level) IsCollidingWithWalls(e Entity) {
+func (l *Level) CheckCollisions(e Entity) bool {
 	for _, wall := range l.Walls {
 		if rl.CheckCollisionRecs(wall.Collider, e.GetCollider()) {
-			rl.TraceLog(rl.LogInfo, "Collision detected")
+			return true
 		}
 	}
+
+	return false
 }

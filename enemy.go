@@ -14,6 +14,7 @@ type Enemy struct {
 	Name              string
 	X                 float32
 	Y                 float32
+	PreviousPosition  rl.Vector2
 	Radius            float32
 	Width             int32
 	Height            int32
@@ -149,7 +150,11 @@ func (e *Enemy) UpdateAnimation() {
 
 }
 
-func (e *Enemy) Render() {
+func (e *Enemy) Render(interpolation float64) {
+
+	// Interpolate the enemy position
+	interpolatedX := e.PreviousPosition.X*(1-float32(interpolation)) + e.X*float32(interpolation)
+	interpolatedY := e.PreviousPosition.Y*(1-float32(interpolation)) + e.Y*float32(interpolation)
 
 	e.TextureSourceRect = rl.NewRectangle(
 		float32(e.frameIndex*e.framesWidth),
@@ -161,7 +166,7 @@ func (e *Enemy) Render() {
 	rl.DrawTexturePro(
 		e.Texture,
 		e.TextureSourceRect,
-		rl.NewRectangle(e.X, e.Y, float32(e.Width), float32(e.Height)),
+		rl.NewRectangle(interpolatedX, interpolatedY, float32(e.Width), float32(e.Height)),
 		rl.NewVector2(16, 16),
 		0,
 		rl.White,
@@ -214,6 +219,8 @@ func ResolveEnemyCollisions(g *Game) {
 }
 
 func (e *Enemy) MoveTowardsPlayer(p *PlayerCharacter) {
+
+	e.PreviousPosition = rl.NewVector2(e.X, e.Y)
 
 	posX, posY := p.GetPosition()
 

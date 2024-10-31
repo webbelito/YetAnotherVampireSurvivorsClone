@@ -15,6 +15,7 @@ type PlayerCharacter struct {
 	Name                  string
 	X                     float32
 	Y                     float32
+	PreviousPosition      rl.Vector2
 	Width                 int32
 	Height                int32
 	Collider              rl.Rectangle
@@ -130,17 +131,20 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 
 func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleInput()
-	p.HandleMovment()
 	p.Fire(g)
 	p.Melee(g)
 	p.ShootHoming(g)
 }
 
 func (p *PlayerCharacter) FixedUpdate(g *Game) {
-	p.HandleColliders()
+	p.HandleMovment()
+	p.HandleColliders(g)
 }
 
 func (p *PlayerCharacter) HandleMovment() {
+
+	// Store the last position for interpolation
+	p.PreviousPosition = rl.Vector2{X: p.X, Y: p.Y}
 
 	totalSpeed := p.Speed
 
@@ -200,11 +204,19 @@ func (p *PlayerCharacter) HandleInput() {
 	}
 }
 
-func (p *PlayerCharacter) HandleColliders() {
+func (p *PlayerCharacter) HandleColliders(g *Game) {
 
 	// Update the collider position
 	p.Collider.X = p.X
 	p.Collider.Y = p.Y
+
+	// Check for collisions with walls
+	if g.Level.CheckCollisions(p) {
+
+		// Push the player back
+		p.X -= float32(p.directionX) * p.Speed * rl.GetFrameTime()
+		p.Y -= float32(p.directionY) * p.Speed * rl.GetFrameTime()
+	}
 }
 
 func (p *PlayerCharacter) GetCollider() rl.Rectangle {
@@ -317,16 +329,20 @@ func (p *PlayerCharacter) UpdateAnimation() {
 
 }
 
-func (p *PlayerCharacter) Render() {
+func (p *PlayerCharacter) Render(interpolation float64) {
 
 	//rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
+
+	// Interpolate the player position
+	interpolatedX := p.PreviousPosition.X*(1-float32(interpolation)) + p.X*float32(interpolation)
+	interpolatedY := p.PreviousPosition.Y*(1-float32(interpolation)) + p.Y*float32(interpolation)
 
 	// Draw the player character
 
 	rl.DrawTexturePro(
 		p.Texture,
 		p.TextureSourceRect,
-		rl.NewRectangle(p.X, p.Y, float32(p.Width), float32(p.Height)),
+		rl.NewRectangle(interpolatedX, interpolatedY, float32(p.Width), float32(p.Height)),
 		rl.Vector2{X: 16, Y: 32},
 		0,
 		rl.White,

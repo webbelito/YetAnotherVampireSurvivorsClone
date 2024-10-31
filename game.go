@@ -201,31 +201,36 @@ func (g *Game) FixedUpdate() {
 	}
 }
 
-func (g *Game) Render() {
+func (g *Game) Render(interpolation float64) {
 	// Level stuffs here
 	g.Level.Render()
 
 	// Player stuffs here
 	g.Player.UpdateAnimation()
-	g.Player.Render()
+	g.Player.Render(interpolation)
 
 	// Enemy stuffs here
 	for _, e := range g.Enemies {
 		e.UpdateAnimation()
-		e.Render()
+		e.Render(interpolation)
 	}
 
 	// Projectile stuffs here
 	for _, p := range g.Projectiles {
-		p.Render()
+		p.Render(interpolation)
 	}
 }
 
 func (g *Game) Run() {
+
+	// Interpolation
+	var accumulatedTime float64 = 0.0
+
 	for !rl.WindowShouldClose() {
 
 		now := time.Now()
 		deltaTime := time.Since(g.LastFixedUpdate).Seconds()
+		accumulatedTime += deltaTime
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
@@ -234,13 +239,30 @@ func (g *Game) Run() {
 
 		g.Update()
 
-		for deltaTime >= float64(g.FixedDeltaTime) {
+		for accumulatedTime >= float64(g.FixedDeltaTime) {
+
+			// Update Phyisics-related elements
 			g.FixedUpdate()
+
+			// Reset the last fixed update time
 			g.LastFixedUpdate = now
-			deltaTime -= float64(g.FixedDeltaTime)
+			accumulatedTime -= float64(g.FixedDeltaTime)
+
 		}
 
-		g.Render()
+		// Calculate the interpolation factor for smoother rendering
+		interpolation := accumulatedTime / float64(g.FixedDeltaTime)
+
+		// Render the game with interpolation
+		g.Render(interpolation)
+
+		/*
+			for deltaTime >= float64(g.FixedDeltaTime) {
+				g.FixedUpdate()
+				g.LastFixedUpdate = now
+				deltaTime -= float64(g.FixedDeltaTime)
+			}
+		*/
 
 		rl.EndMode2D()
 
@@ -258,7 +280,7 @@ func (g *Game) Run() {
 }
 
 func (g *Game) SpawnPlayer() {
-	g.Player = NewPlayer("Bill", 32, 64, 150, 100, 50)
+	g.Player = NewPlayer("Bill", 32, 64, 300, 100, 50)
 }
 
 func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {

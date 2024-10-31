@@ -7,6 +7,7 @@ import (
 type Projectile struct {
 	X                 float32
 	Y                 float32
+	PreviousPosition  rl.Vector2
 	Radius            float32
 	Texture           rl.Texture2D
 	TextureSourceRect rl.Rectangle
@@ -51,6 +52,9 @@ func (p *Projectile) Update(g *Game) {
 
 	if p.Active {
 
+		// Store the previous position
+		p.PreviousPosition = rl.Vector2{X: p.X, Y: p.Y}
+
 		if p.IsHoming {
 			enemy := p.FindClosestEnemy(g.Enemies)
 			if enemy != nil {
@@ -70,8 +74,6 @@ func (p *Projectile) Update(g *Game) {
 			}
 		}
 
-		p.Render()
-
 		// Deactivate projectiles that are out of bounds
 		if p.X < 0 || p.X > float32(rl.GetScreenWidth()) || p.Y < 0 || p.Y > float32(rl.GetScreenHeight()) {
 			p.Active = false
@@ -79,11 +81,16 @@ func (p *Projectile) Update(g *Game) {
 	}
 }
 
-func (p *Projectile) Render() {
+func (p *Projectile) Render(interpolation float64) {
+
+	// Interpolate the projectile position
+	interpolatedX := p.PreviousPosition.X*(1-float32(interpolation)) + p.X*float32(interpolation)
+	interpolatedY := p.PreviousPosition.Y*(1-float32(interpolation)) + p.Y*float32(interpolation)
+
 	rl.DrawTexturePro(
 		p.Texture,
 		p.TextureSourceRect,
-		rl.NewRectangle(p.X, p.Y, 32, 32),
+		rl.NewRectangle(interpolatedX, interpolatedY, 32, 32),
 		rl.Vector2{X: 32, Y: 32},
 		0,
 		rl.White,
