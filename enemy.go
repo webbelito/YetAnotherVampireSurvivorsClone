@@ -17,6 +17,7 @@ type Enemy struct {
 	Radius            float32
 	Width             int32
 	Height            int32
+	Collider          rl.Rectangle
 	Texture           rl.Texture2D
 	TextureSourceRect rl.Rectangle
 	TextureBasePos    rl.Vector2
@@ -106,17 +107,30 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		rl.TraceLog(rl.LogError, "NewEnemy: Default Case, Unknown enemy type")
 	}
 
+	e.Collider = rl.NewRectangle(e.X, e.Y, float32(e.Width), float32(e.Height))
+
 	return e
 
 }
 
 func (e *Enemy) Update(p *PlayerCharacter) {
-
-	e.MoveTowardsPlayer(p)
-
 	e.UpdateAnimation()
+}
 
-	e.Render()
+func (e *Enemy) FixedUpdate(g *Game) {
+	e.MoveTowardsPlayer(g.Player)
+	e.HandleColliders()
+}
+
+func (e *Enemy) HandleColliders() {
+
+	// Update the collider position
+	e.Collider.X = e.X
+	e.Collider.Y = e.Y
+}
+
+func (e *Enemy) GetCollider() rl.Rectangle {
+	return e.Collider
 }
 
 func (e *Enemy) UpdateAnimation() {

@@ -60,7 +60,6 @@ func NewGame() *Game {
 		"[........X.........................................X.......]",
 		"[..........................................................]",
 		"[..........................................................]",
-
 		"@__________________________________________________________@",
 	}
 
@@ -188,11 +187,18 @@ func (g *Game) Update() {
 func (g *Game) FixedUpdate() {
 	fixedFrameCounter++
 
+	// Player
+	g.Player.FixedUpdate(g)
+
 	// Resolve collisions every 3rd frame
 	if fixedFrameCounter%3 == 0 {
 		ResolveEnemyCollisions(g)
 	}
 
+	// Enemies
+	for i := 0; i < len(g.Enemies); i++ {
+		g.Enemies[i].FixedUpdate(g)
+	}
 }
 
 func (g *Game) Render() {
@@ -219,7 +225,7 @@ func (g *Game) Run() {
 	for !rl.WindowShouldClose() {
 
 		now := time.Now()
-		deltaTime := time.Until(now).Seconds()
+		deltaTime := time.Since(g.LastFixedUpdate).Seconds()
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)

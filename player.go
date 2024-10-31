@@ -17,6 +17,7 @@ type PlayerCharacter struct {
 	Y                     float32
 	Width                 int32
 	Height                int32
+	Collider              rl.Rectangle
 	Speed                 float32
 	directionX            int32
 	directionY            int32
@@ -121,6 +122,9 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 		float32(p.framesHeight),
 	)
 
+	// Create the Collider
+	p.Collider = rl.NewRectangle(p.X, p.Y, float32(p.Width), float32(p.Height))
+
 	return p
 }
 
@@ -130,10 +134,10 @@ func (p *PlayerCharacter) Update(g *Game) {
 	p.Fire(g)
 	p.Melee(g)
 	p.ShootHoming(g)
-	//p.UpdateAnimation()
-	//p.Render()
+}
 
-	//p.DrawAttackTriangle(p.CalculcateMeleeAttackArea(100, 300))
+func (p *PlayerCharacter) FixedUpdate(g *Game) {
+	p.HandleColliders()
 }
 
 func (p *PlayerCharacter) HandleMovment() {
@@ -196,6 +200,16 @@ func (p *PlayerCharacter) HandleInput() {
 	}
 }
 
+func (p *PlayerCharacter) HandleColliders() {
+
+	// Update the collider position
+	p.Collider.X = p.X
+	p.Collider.Y = p.Y
+}
+
+func (p *PlayerCharacter) GetCollider() rl.Rectangle {
+	return p.Collider
+}
 func (p *PlayerCharacter) TurnPlayerRight() {
 	p.TextureSourceRect = rl.NewRectangle(0, 64, 32, 64)
 }
