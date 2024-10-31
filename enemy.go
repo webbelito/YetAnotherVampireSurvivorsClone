@@ -48,7 +48,7 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		Height:         h,
 		Texture:        t,
 		Health:         health,
-		LastAttackTime: 0,
+		LastAttackTime: 1,
 		AttackCooldown: 1,
 		IsDead:         false,
 		frameIndex:     1,
