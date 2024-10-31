@@ -8,13 +8,23 @@ import (
 const (
 	Empty = iota
 	Wall
+	LeftWall
+	RightWall
+	TopWall
+	BottomWall
+	BlockWall
 	Grass
 )
 
 // Map of characters to tile types
 var tileMap = map[rune]int{
 	' ': Empty,
-	'#': Wall,
+	'X': Wall,
+	'[': LeftWall,
+	']': RightWall,
+	'^': TopWall,
+	'v': BottomWall,
+	'@': BlockWall,
 	'.': Grass,
 }
 
@@ -66,12 +76,68 @@ func (l *Level) Render() {
 
 				rl.DrawTexturePro(
 					TextureAtlas,
+					rl.NewRectangle(128, 320, 32, 32),
+					rl.NewRectangle(float32(x), float32(y), 32, 32),
+					rl.NewVector2(0, 0),
+					0,
+					rl.White,
+				)
+
+			case LeftWall:
+
+				rl.DrawTexturePro(
+					TextureAtlas,
+					rl.NewRectangle(96, 320, 32, 32),
+					rl.NewRectangle(float32(x), float32(y), 32, 32),
+					rl.NewVector2(0, 0),
+					0,
+					rl.White,
+				)
+
+			case RightWall:
+
+				rl.DrawTexturePro(
+					TextureAtlas,
+					rl.NewRectangle(32, 320, 32, 32),
+					rl.NewRectangle(float32(x), float32(y), 32, 32),
+					rl.NewVector2(0, 0),
+					0,
+					rl.White,
+				)
+
+			case TopWall:
+
+				rl.DrawTexturePro(
+					TextureAtlas,
 					rl.NewRectangle(0, 320, 32, 32),
 					rl.NewRectangle(float32(x), float32(y), 32, 32),
 					rl.NewVector2(0, 0),
 					0,
 					rl.White,
 				)
+
+			case BottomWall:
+
+				rl.DrawTexturePro(
+					TextureAtlas,
+					rl.NewRectangle(64, 320, 32, 32),
+					rl.NewRectangle(float32(x), float32(y), 32, 32),
+					rl.NewVector2(0, 0),
+					0,
+					rl.White,
+				)
+
+			case BlockWall:
+
+				rl.DrawTexturePro(
+					TextureAtlas,
+					rl.NewRectangle(160, 320, 32, 32),
+					rl.NewRectangle(float32(x), float32(y), 32, 32),
+					rl.NewVector2(0, 0),
+					0,
+					rl.White,
+				)
+
 			case Grass:
 
 				rl.DrawTexturePro(
