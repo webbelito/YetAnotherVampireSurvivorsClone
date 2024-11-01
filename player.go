@@ -167,21 +167,6 @@ func (p *PlayerCharacter) HandleMovment() {
 	p.X += float32(p.directionX) * totalSpeed * rl.GetFrameTime()
 	p.Y += float32(p.directionY) * totalSpeed * rl.GetFrameTime()
 
-	// Limit player movement to screen width
-	if p.X <= 0 {
-		p.X = 0
-	} else if p.X >= float32(int32(rl.GetScreenWidth())-p.Width) {
-		p.X = float32(int32(rl.GetScreenWidth()) - p.Width)
-	}
-
-	// Limit player movement to screen height
-	if p.Y <= 0 {
-		p.Y = 0
-	}
-	if p.Y >= float32(int32(rl.GetScreenHeight())-p.Height) {
-		p.Y = float32(int32(rl.GetScreenHeight()) - p.Height)
-	}
-
 }
 
 func (p *PlayerCharacter) HandleInput() {
