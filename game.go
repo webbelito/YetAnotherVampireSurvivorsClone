@@ -98,8 +98,7 @@ var fixedFrameCounter int
 func (g *Game) Update() {
 
 	if g.Player != nil && g.Player.IsDead {
-		rl.DrawText("Game Over", int32(rl.GetScreenWidth())/2-250, int32(rl.GetScreenHeight())/2, 100, rl.Red)
-		return
+		g.SetGameState(GameOver)
 	}
 
 	// TODO: Create a better way of spawning the player
@@ -298,6 +297,8 @@ func (g *Game) Run() {
 			// TODO: Implement the LeveledUp state
 		case GameOver:
 			// TODO: Implement the GameOver state
+			rl.ClearBackground(rl.Black)
+			rl.DrawText("Game Over", int32(rl.GetScreenWidth()/2-500), int32(rl.GetScreenHeight()/2-200), 200, rl.Red)
 		}
 
 		rl.EndDrawing()
