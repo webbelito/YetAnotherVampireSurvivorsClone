@@ -343,7 +343,7 @@ func (p *PlayerCharacter) Render(interpolation float64) {
 	interpolatedY := p.PreviousPosition.Y*(1-float32(interpolation)) + p.Y*float32(interpolation)
 
 	// Draw the player collider
-	rl.DrawRectangle(int32(p.Collider.X), int32(p.Collider.Y), int32(p.Collider.Width), int32(p.Collider.Height), rl.Red)
+	// rl.DrawRectangle(int32(p.Collider.X), int32(p.Collider.Y), int32(p.Collider.Width), int32(p.Collider.Height), rl.Red)
 
 	// Draw the player character
 
