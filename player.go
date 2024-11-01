@@ -77,6 +77,7 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 		Speed:                 s,
 		directionX:            0,
 		directionY:            0,
+		targetDirection:       rl.Vector2{X: 1, Y: 0},
 		Texture:               TextureAtlas,
 		TextureSourceRect:     rl.NewRectangle(0, 64, 32, 64),
 		Health:                health,
@@ -133,9 +134,19 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 
 func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleInput()
-	p.Fire(g)
-	p.Melee(g)
-	p.ShootHoming(g)
+
+	// TODO: Implement a better way to handle loadouts
+	if p.Level >= 1 {
+		p.Fire(g)
+	}
+
+	if p.Level >= 2 {
+		p.Melee(g)
+	}
+
+	if p.Level >= 4 {
+		p.ShootHoming(g)
+	}
 
 	// Check if we should Level Up
 	if p.Experience >= p.RequiredExperience {
