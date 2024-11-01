@@ -136,6 +136,11 @@ func (p *PlayerCharacter) Update(g *Game) {
 	p.Fire(g)
 	p.Melee(g)
 	p.ShootHoming(g)
+
+	// Check if we should Level Up
+	if p.Experience >= p.RequiredExperience {
+		p.LevelUp()
+	}
 }
 
 func (p *PlayerCharacter) FixedUpdate(g *Game) {
@@ -583,6 +588,9 @@ func (p *PlayerCharacter) LevelUp() {
 		// Increase the speed
 		p.Speed += 10
 	*/
+
+	// Reset the health
+	p.Health = p.MaxHealth
 
 	// Reset the experience
 	p.Experience = 0

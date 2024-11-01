@@ -16,6 +16,7 @@ type Game struct {
 	Enemies         []*Enemy
 	Projectiles     []*Projectile
 	PowerUps        []*PowerUp
+	ExperienceGems  []*ExperienceGem
 	FixedDeltaTime  float32
 	LastFixedUpdate time.Time
 }
@@ -199,6 +200,11 @@ func (g *Game) FixedUpdate() {
 	for i := 0; i < len(g.Enemies); i++ {
 		g.Enemies[i].FixedUpdate(g)
 	}
+
+	// Experience Gems
+	for i := 0; i < len(g.ExperienceGems); i++ {
+		g.ExperienceGems[i].FixedUpdate(g)
+	}
 }
 
 func (g *Game) Render(interpolation float64) {
@@ -218,6 +224,11 @@ func (g *Game) Render(interpolation float64) {
 	// Projectile stuffs here
 	for _, p := range g.Projectiles {
 		p.Render(interpolation)
+	}
+
+	// Experience Gem stuffs here
+	for _, eg := range g.ExperienceGems {
+		eg.Render()
 	}
 }
 
@@ -318,6 +329,8 @@ func (g *Game) DestroyEnemy() {
 		if !e.IsDead {
 			g.Enemies[i] = e
 			i++
+		} else {
+			g.SpawnExperienceGem(e.X, e.Y, e.ExperienceValue)
 		}
 	}
 
@@ -373,4 +386,8 @@ func (g *Game) DestroyPowerUp() {
 	// Truncate the slice to remove inactive powerups
 	g.PowerUps = g.PowerUps[:i]
 
+}
+
+func (g *Game) SpawnExperienceGem(x float32, y float32, amount int32) {
+	g.ExperienceGems = append(g.ExperienceGems, NewExperienceGem(x, y, amount))
 }

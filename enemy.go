@@ -27,6 +27,7 @@ type Enemy struct {
 	SpawnY            float32
 	Health            float32
 	Damage            float32
+	ExperienceValue   int32
 	LastAttackTime    float32
 	AttackCooldown    float32
 	AttackRange       float32
@@ -79,6 +80,9 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 
 		e.Radius = 16
 
+		// Experience
+		e.ExperienceValue = 1
+
 		// Animation
 		e.totalFrames = 8
 		e.framesWidth = 32
@@ -99,6 +103,9 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		e.Damage = 25
 		e.Speed = 20
 		e.Health = 200
+
+		// Experience
+		e.ExperienceValue = 10
 
 		// Animation
 		e.totalFrames = 1
