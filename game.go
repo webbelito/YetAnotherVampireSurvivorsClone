@@ -21,6 +21,7 @@ type Game struct {
 	FixedDeltaTime   float32
 	LastFixedUpdate  time.Time
 	GameTime         float32
+	WaveManager      *WaveManager
 }
 
 func NewGame() *Game {
@@ -80,6 +81,16 @@ func NewGame() *Game {
 		Zoom:     2,
 	}
 
+	// Wave Manager stuffs
+	waveManager := &WaveManager{
+		Waves: []Wave{
+			{EnemyCounts: map[EnemyType]int{Bat: 50}, SpawnInterval: 0.5, Duration: 10.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 100}, SpawnInterval: 0.3, Duration: 20.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 150}, SpawnInterval: 0.1, Duration: 30.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 150, Pumpkin: 50}, SpawnInterval: 0.1, Duration: 40.0},
+		},
+	}
+
 	return &Game{
 		currentGameState: MainMenu,
 		Player:           nil,
@@ -90,6 +101,7 @@ func NewGame() *Game {
 		PowerUps:         make([]*PowerUp, 0),
 		FixedDeltaTime:   1.0 / FixedUpdateRate,
 		LastFixedUpdate:  time.Now(),
+		WaveManager:      waveManager,
 	}
 }
 
@@ -206,6 +218,23 @@ func (g *Game) FixedUpdate() {
 	// Experience Gems
 	for i := 0; i < len(g.ExperienceGems); i++ {
 		g.ExperienceGems[i].FixedUpdate(g)
+	}
+
+	// Wave Manager
+	if g.WaveManager.CurrentWaveIndex < len(g.WaveManager.Waves) {
+		waveManager := g.WaveManager
+		currentWave := waveManager.Waves[waveManager.CurrentWaveIndex]
+
+		waveManager.TimeSinceLastSpawn += g.FixedDeltaTime
+		waveManager.TimeSinceLastWave += g.FixedDeltaTime
+
+		if waveManager.TimeSinceLastWave < currentWave.Duration {
+			waveManager.SpawnEnemies(g)
+		} else {
+			waveManager.TimeSinceLastWave = 0
+			waveManager.TimeSinceLastSpawn = 0
+			waveManager.CurrentWaveIndex++
+		}
 	}
 }
 
@@ -348,6 +377,15 @@ func (g *Game) DestroyProjectiles() {
 
 func (g *Game) SpawnBat() {
 	g.Enemies = append(g.Enemies, NewEnemy(TextureAtlas, "Bat", 32, 32, 10))
+}
+
+func (g *Game) SpawnEnemy(et EnemyType) {
+	switch et {
+	case Bat:
+		g.SpawnBat()
+	case Pumpkin:
+		g.SpawnPumpkin()
+	}
 }
 
 func (g *Game) SpawnPumpkin() {
