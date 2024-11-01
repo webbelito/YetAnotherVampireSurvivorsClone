@@ -19,6 +19,7 @@ type PlayerCharacter struct {
 	Width                 int32
 	Height                int32
 	Collider              rl.Rectangle
+	ColliderAdjustment    rl.Vector2
 	Speed                 float32
 	directionX            int32
 	directionY            int32
@@ -88,7 +89,7 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 		LastShotTime:          0,
 		ShootCooldown:         1,
 		MeleeAttackSourceRect: rl.NewRectangle(0, 254, 32, 64),
-		MeleeAttackBasePos:    rl.NewVector2(32, -32),
+		MeleeAttackBasePos:    rl.NewVector2(32, 0),
 		LastMeleeTime:         0,
 		MeleeCooldown:         2,
 		LastHomingTime:        0,
@@ -124,7 +125,8 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 	)
 
 	// Create the Collider
-	p.Collider = rl.NewRectangle(p.X, p.Y, float32(p.Width), float32(p.Height))
+	p.ColliderAdjustment = rl.NewVector2(0, 9)
+	p.Collider = rl.NewRectangle(p.X, p.Y, float32(p.Width-int32(p.ColliderAdjustment.X)), float32(p.Height-int32(p.ColliderAdjustment.Y)))
 
 	return p
 }
@@ -331,11 +333,12 @@ func (p *PlayerCharacter) UpdateAnimation() {
 
 func (p *PlayerCharacter) Render(interpolation float64) {
 
-	//rl.DrawRectangle(int32(p.X), int32(p.Y), p.Width, p.Height, rl.Green)
-
 	// Interpolate the player position
 	interpolatedX := p.PreviousPosition.X*(1-float32(interpolation)) + p.X*float32(interpolation)
 	interpolatedY := p.PreviousPosition.Y*(1-float32(interpolation)) + p.Y*float32(interpolation)
+
+	// Draw the player collider
+	rl.DrawRectangle(int32(p.Collider.X), int32(p.Collider.Y), int32(p.Collider.Width), int32(p.Collider.Height), rl.Red)
 
 	// Draw the player character
 
@@ -343,7 +346,7 @@ func (p *PlayerCharacter) Render(interpolation float64) {
 		p.Texture,
 		p.TextureSourceRect,
 		rl.NewRectangle(interpolatedX, interpolatedY, float32(p.Width), float32(p.Height)),
-		rl.Vector2{X: 16, Y: 32},
+		rl.Vector2{X: 0, Y: 0},
 		0,
 		rl.White,
 	)

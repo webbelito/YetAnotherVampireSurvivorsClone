@@ -66,11 +66,11 @@ func NewGame() *Game {
 	level := NewLevel(grid)
 	camera := rl.Camera2D{
 		Offset: rl.Vector2{
-			X: float32(rl.GetScreenWidth()) / 2,
+			X: float32(rl.GetScreenWidth())/2 - 16,
 			Y: float32(rl.GetScreenHeight()) / 2,
 		},
 		Target: rl.Vector2{
-			X: float32(rl.GetScreenWidth()) / 2,
+			X: float32(rl.GetScreenWidth())/2 - 16,
 			Y: float32(rl.GetScreenHeight()) / 2,
 		},
 		Rotation: 0,
@@ -255,14 +255,6 @@ func (g *Game) Run() {
 
 		// Render the game with interpolation
 		g.Render(interpolation)
-
-		/*
-			for deltaTime >= float64(g.FixedDeltaTime) {
-				g.FixedUpdate()
-				g.LastFixedUpdate = now
-				deltaTime -= float64(g.FixedDeltaTime)
-			}
-		*/
 
 		rl.EndMode2D()
 
