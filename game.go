@@ -10,15 +10,16 @@ import (
 const FixedUpdateRate float32 = 60.0
 
 type Game struct {
-	Player          *PlayerCharacter
-	Level           *Level
-	Camera          rl.Camera2D
-	Enemies         []*Enemy
-	Projectiles     []*Projectile
-	PowerUps        []*PowerUp
-	ExperienceGems  []*ExperienceGem
-	FixedDeltaTime  float32
-	LastFixedUpdate time.Time
+	currentGameState GameState
+	Player           *PlayerCharacter
+	Level            *Level
+	Camera           rl.Camera2D
+	Enemies          []*Enemy
+	Projectiles      []*Projectile
+	PowerUps         []*PowerUp
+	ExperienceGems   []*ExperienceGem
+	FixedDeltaTime   float32
+	LastFixedUpdate  time.Time
 }
 
 func NewGame() *Game {
@@ -79,14 +80,15 @@ func NewGame() *Game {
 	}
 
 	return &Game{
-		Player:          nil,
-		Level:           level,
-		Camera:          camera,
-		Enemies:         make([]*Enemy, 0),
-		Projectiles:     make([]*Projectile, 0),
-		PowerUps:        make([]*PowerUp, 0),
-		FixedDeltaTime:  1.0 / FixedUpdateRate,
-		LastFixedUpdate: time.Now(),
+		currentGameState: MainMenu,
+		Player:           nil,
+		Level:            level,
+		Camera:           camera,
+		Enemies:          make([]*Enemy, 0),
+		Projectiles:      make([]*Projectile, 0),
+		PowerUps:         make([]*PowerUp, 0),
+		FixedDeltaTime:   1.0 / FixedUpdateRate,
+		LastFixedUpdate:  time.Now(),
 	}
 }
 
@@ -246,40 +248,64 @@ func (g *Game) Run() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		rl.BeginMode2D(g.Camera)
+		switch g.currentGameState {
+		case MainMenu:
+			// TODO: Implement the MainMenu state
 
-		g.Update()
+			// TODO: Refactor this into a separate function
+			rl.ClearBackground(rl.Black)
+			rl.DrawText("YAVSC", int32(rl.GetScreenWidth()/2-400), int32(rl.GetScreenHeight()/2-200), 200, rl.Red)
+			rl.DrawText("Press Enter to Start", int32(rl.GetScreenWidth()/2-325), int32(rl.GetScreenHeight()/2), 50, rl.White)
 
-		for accumulatedTime >= float64(g.FixedDeltaTime) {
+			if rl.IsKeyPressed(rl.KeyEnter) {
+				g.SetGameState(Playing)
+			}
 
-			// Update Phyisics-related elements
-			g.FixedUpdate()
+		case Playing:
+			rl.BeginMode2D(g.Camera)
 
-			// Reset the last fixed update time
-			g.LastFixedUpdate = now
-			accumulatedTime -= float64(g.FixedDeltaTime)
+			g.Update()
 
+			for accumulatedTime >= float64(g.FixedDeltaTime) {
+
+				// Update Phyisics-related elements
+				g.FixedUpdate()
+
+				// Reset the last fixed update time
+				g.LastFixedUpdate = now
+				accumulatedTime -= float64(g.FixedDeltaTime)
+
+			}
+
+			// Calculate the interpolation factor for smoother rendering
+			interpolation := accumulatedTime / float64(g.FixedDeltaTime)
+
+			// Render the game with interpolation
+			g.Render(interpolation)
+
+			rl.EndMode2D()
+
+			// HUD Stuffs Here
+			// TODO: Separate the HUD from the PlayerCharacter
+			g.Player.HUD.Render()
+			g.RenderMobsCounter()
+			g.RenderPowerUpHUD()
+
+			g.RenderFPS()
+		case Paused:
+			// TODO: Implement the Paused state
+		case LeveledUp:
+			// TODO: Implement the LeveledUp state
+		case GameOver:
+			// TODO: Implement the GameOver state
 		}
-
-		// Calculate the interpolation factor for smoother rendering
-		interpolation := accumulatedTime / float64(g.FixedDeltaTime)
-
-		// Render the game with interpolation
-		g.Render(interpolation)
-
-		rl.EndMode2D()
-
-		// HUD Stuffs Here
-		// TODO: Separate the HUD from the PlayerCharacter
-		g.Player.HUD.Render()
-		g.RenderMobsCounter()
-		g.RenderPowerUpHUD()
-
-		// Draw the FPS
-		rl.DrawFPS(10, int32(rl.GetScreenHeight()-20))
 
 		rl.EndDrawing()
 	}
+}
+
+func (g *Game) SetGameState(state GameState) {
+	g.currentGameState = state
 }
 
 func (g *Game) SpawnPlayer() {
@@ -365,6 +391,10 @@ func (g *Game) RenderPowerUpHUD() {
 func (g *Game) RenderMobsCounter() {
 	mobCount := fmt.Sprintf("Mobs: %d", len(g.Enemies))
 	rl.DrawText(mobCount, 10, int32(rl.GetScreenHeight()-50), 20, rl.Red)
+}
+
+func (g *Game) RenderFPS() {
+	rl.DrawFPS(10, int32(rl.GetScreenHeight()-20))
 }
 
 func (g *Game) DestroyPowerUp() {
