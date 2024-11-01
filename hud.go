@@ -73,7 +73,7 @@ func (h *HUD) RenderExperienceBar() {
 	barHeight := int32(50)
 
 	// Create the background of the experience bar
-	rl.DrawRectangle(posX, posY, barWidth, barHeight, rl.Black)
+	rl.DrawRectangle(posX, posY, barWidth, barHeight, rl.ColorAlpha(rl.Black, 0.5))
 
 	experiencePercentage := (float32(currentExperience) / float32(maxExperience))
 	experienceBarWidth := int32(float32(barWidth) * experiencePercentage)

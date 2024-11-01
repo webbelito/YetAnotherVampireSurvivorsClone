@@ -246,7 +246,7 @@ func (g *Game) Run() {
 		accumulatedTime += deltaTime
 
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.RayWhite)
+		rl.ClearBackground(rl.Black)
 
 		switch g.currentGameState {
 		case MainMenu:
