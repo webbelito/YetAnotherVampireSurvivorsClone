@@ -34,11 +34,13 @@ func (h *HUD) RenderHealthBar() {
 	maxHealth := h.Player.MaxHealth
 	currentHealth := h.Player.Health
 
-	posX := int32(rl.GetScreenWidth()/2 - 100)
-	posY := int32(rl.GetScreenHeight()/2 + 50)
-
 	barWidth := int32(200)
 	barHeight := int32(20)
+
+	barYOffset := int32(150)
+
+	posX := int32(rl.GetScreenWidth()/2 - int(barWidth)/2 + int(h.Player.Width/2))
+	posY := int32(rl.GetScreenHeight()/2 + int(barHeight)/2 + int(barYOffset))
 
 	barXPosition := posX
 	barYPosition := posY
