@@ -389,16 +389,8 @@ func (p *PlayerCharacter) Fire(g *Game) {
 		// Reset the last shot time
 		p.LastShotTime = 0
 
-		// Get the mouse position
-		mousePos := rl.GetMousePosition()
-
-		// Calculate the direction from the player to the mouse
-		direction := rl.Vector2{
-			X: mousePos.X - float32(p.X),
-			Y: mousePos.Y - float32(p.Y),
-		}
-
-		direction = rl.Vector2Normalize(direction)
+		// Calculate the target direction based on the player's movement
+		direction := rl.Vector2Normalize(p.targetDirection)
 
 		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Black, false)
 
