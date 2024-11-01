@@ -20,6 +20,7 @@ type Game struct {
 	ExperienceGems   []*ExperienceGem
 	FixedDeltaTime   float32
 	LastFixedUpdate  time.Time
+	GameTime         float32
 }
 
 func NewGame() *Game {
@@ -264,6 +265,9 @@ func (g *Game) Run() {
 
 		case Playing:
 
+			// Update the GameTime in seconds
+			g.GameTime += float32(rl.GetFrameTime())
+
 			rl.BeginMode2D(g.Camera)
 
 			g.Update()
@@ -289,7 +293,8 @@ func (g *Game) Run() {
 
 			// HUD Stuffs Here
 			// TODO: Separate the HUD from the PlayerCharacter
-			g.Player.HUD.Render()
+
+			g.Player.HUD.Render(g)
 			g.RenderMobsCounter()
 			g.RenderPowerUpHUD()
 

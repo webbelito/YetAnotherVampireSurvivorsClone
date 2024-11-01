@@ -20,9 +20,11 @@ func NewHUD(p *PlayerCharacter) *HUD {
 	}
 }
 
-func (h *HUD) Render() {
+// TODO: Check if we really need the game object
+func (h *HUD) Render(g *Game) {
 	h.RenderHealthBar()
 	h.RenderExperienceBar()
+	h.RenderGameTime(g)
 
 	if h.LeveledUp && h.LeveledUpDuration > 0 {
 		h.RenderLeveledUp()
@@ -113,4 +115,47 @@ func (h *HUD) RenderLeveledUp() {
 		h.LeveledUpDuration = 2
 
 	}
+}
+
+func (h *HUD) RenderGameTime(g *Game) {
+
+	gameTime := ""
+
+	displaySeconds := false
+	displayMinutes := false
+	displayHours := false
+
+	// Format the game time into hours, minutes and seconds
+	gameTimeHours := int(g.GameTime / 3600)
+	gameTimeMinutes := int((g.GameTime - float32(gameTimeHours*3600)) / 60)
+	gameTimeSeconds := int(g.GameTime - float32(gameTimeHours)*3600 - float32(gameTimeMinutes)*60)
+
+	// Show only seconds if the game time is less than 1 minute
+	if gameTimeHours == 0 && gameTimeMinutes == 0 {
+		displaySeconds = true
+		gameTime = fmt.Sprintf("%02d", gameTimeSeconds)
+	} else if gameTimeHours == 0 {
+		displayMinutes = true
+		gameTime = fmt.Sprintf("%02d:%02d", gameTimeMinutes, gameTimeSeconds)
+	} else {
+		displayHours = true
+		gameTime = fmt.Sprintf("%02d:%02d:%02d", gameTimeHours, gameTimeMinutes, gameTimeSeconds)
+	}
+
+	textXPosition := int32(0)
+	textYPosition := int32(55)
+
+	if displaySeconds && !displayMinutes && !displayHours {
+
+		textXPosition = int32(rl.GetScreenWidth() / 2)
+
+	} else if displaySeconds && displayMinutes && !displayHours {
+
+		textXPosition = int32(rl.GetScreenWidth()/2 - 25)
+
+	} else {
+		textXPosition = int32(rl.GetScreenWidth()/2 - 50)
+	}
+
+	rl.DrawText(gameTime, textXPosition, textYPosition, 40, rl.White)
 }
