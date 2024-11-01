@@ -42,17 +42,14 @@ func (h *HUD) RenderHealthBar() {
 	posX := int32(rl.GetScreenWidth()/2 - int(barWidth)/2 + int(h.Player.Width/2))
 	posY := int32(rl.GetScreenHeight()/2 + int(barHeight)/2 + int(barYOffset))
 
-	barXPosition := posX
-	barYPosition := posY
-
 	// Create the background of the health bar
-	rl.DrawRectangle(barXPosition, barYPosition, barWidth, barHeight, rl.Black)
+	rl.DrawRectangle(posX, posY, barWidth, barHeight, rl.Black)
 
 	healthPercentage := (currentHealth / maxHealth)
 	healthBarWidth := int32(float32(barWidth) * healthPercentage)
 
 	// Create the health bar
-	rl.DrawRectangle(barXPosition, barYPosition, healthBarWidth, barHeight, rl.Red)
+	rl.DrawRectangle(posX, posY, healthBarWidth, barHeight, rl.Red)
 
 	// Draw the health text
 	healthText := fmt.Sprintf("HP: %.0f/%.0f", currentHealth, maxHealth)
@@ -75,17 +72,14 @@ func (h *HUD) RenderExperienceBar() {
 	barWidth := int32(rl.GetScreenWidth())
 	barHeight := int32(50)
 
-	barXPosition := posX
-	barYPosition := posY
-
 	// Create the background of the experience bar
-	rl.DrawRectangle(barXPosition, barYPosition, barWidth, barHeight, rl.Black)
+	rl.DrawRectangle(posX, posY, barWidth, barHeight, rl.Black)
 
 	experiencePercentage := (float32(currentExperience) / float32(maxExperience))
 	experienceBarWidth := int32(float32(barWidth) * experiencePercentage)
 
 	// Create the experience bar
-	rl.DrawRectangle(barXPosition, barYPosition, experienceBarWidth, barHeight, rl.Blue)
+	rl.DrawRectangle(posX, posY, experienceBarWidth, barHeight, rl.Blue)
 
 	// Draw the experience text
 	experienceText := fmt.Sprintf("Level: %d Experience: %d/%d", level, currentExperience, maxExperience)
