@@ -9,6 +9,8 @@ const SCREEN_WIDTH = 1920
 const SCREEN_HEIGHT = 1080
 const SCREEN_TITLE = "YAVSC - Yet Another Vampire Survivors Clone"
 
+const DEBUG_MODE = true
+
 var TextureAtlas rl.Texture2D
 
 func main() {
@@ -34,39 +36,13 @@ func main() {
 	// Initialize the game
 	game := NewGame()
 
-	// Random timer to despawn title text
-	//titleDisplayTimer := float32(0.0)
-
 	rl.SetTargetFPS(180)
 
 	game.Run()
 
-	/*
-		for !rl.WindowShouldClose() {
-
-			// TODO: Implement a 2d camera
-
-			rl.BeginDrawing()
-
-			game.Update()
-
-			rl.ClearBackground(rl.RayWhite)
-
-			rl.DrawFPS(int32(10), int32(rl.GetScreenHeight()-30))
-
-			// Display title text for 3 seconds
-			if titleDisplayTimer < 3.0 {
-				titleDisplayTimer = titleDisplayTimer + rl.GetFrameTime()
-				rl.DrawText(SCREEN_TITLE, SCREEN_WIDTH/2-500, SCREEN_HEIGHT/2, 48, rl.Maroon)
-			}
-
-			rl.EndDrawing()
-		}
-	*/
 }
 
 // TODO: Implement a proper debug mode
 func isDebugMode() bool {
-	debug := true
-	return debug
+	return DEBUG_MODE
 }

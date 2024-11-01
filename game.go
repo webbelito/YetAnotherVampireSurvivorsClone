@@ -98,7 +98,7 @@ var fixedFrameCounter int
 func (g *Game) Update() {
 
 	if g.Player != nil && g.Player.IsDead {
-		g.SetGameState(GameOver)
+		g.ChangeGameState(GameOver)
 	}
 
 	// TODO: Create a better way of spawning the player
@@ -242,6 +242,7 @@ func (g *Game) Run() {
 
 		now := time.Now()
 		deltaTime := time.Since(g.LastFixedUpdate).Seconds()
+		g.LastFixedUpdate = now
 		accumulatedTime += deltaTime
 
 		rl.BeginDrawing()
@@ -249,6 +250,7 @@ func (g *Game) Run() {
 
 		switch g.currentGameState {
 		case MainMenu:
+
 			// TODO: Implement the MainMenu state
 
 			// TODO: Refactor this into a separate function
@@ -257,10 +259,11 @@ func (g *Game) Run() {
 			rl.DrawText("Press Enter to Start", int32(rl.GetScreenWidth()/2-325), int32(rl.GetScreenHeight()/2), 50, rl.White)
 
 			if rl.IsKeyPressed(rl.KeyEnter) {
-				g.SetGameState(Playing)
+				g.ChangeGameState(Playing)
 			}
 
 		case Playing:
+
 			rl.BeginMode2D(g.Camera)
 
 			g.Update()
@@ -305,8 +308,10 @@ func (g *Game) Run() {
 	}
 }
 
-func (g *Game) SetGameState(state GameState) {
+func (g *Game) ChangeGameState(state GameState) {
 	g.currentGameState = state
+
+	rl.TraceLog(rl.LogDebug, "GameState changed to: %s", state)
 }
 
 func (g *Game) SpawnPlayer() {

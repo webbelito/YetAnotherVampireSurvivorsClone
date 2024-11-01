@@ -10,3 +10,7 @@ const (
 	LeveledUp
 	GameOver
 )
+
+func (g GameState) String() string {
+	return [...]string{"MainMenu", "Reset", "Playing", "Paused", "LeveledUp", "GameOver"}[g]
+}
