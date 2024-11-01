@@ -20,8 +20,10 @@ type Game struct {
 	ExperienceGems   []*ExperienceGem
 	FixedDeltaTime   float32
 	LastFixedUpdate  time.Time
+	LastFrameTime    time.Time
 	GameTime         float32
 	WaveManager      *WaveManager
+	IsPaused         bool
 }
 
 func NewGame() *Game {
@@ -102,6 +104,7 @@ func NewGame() *Game {
 		FixedDeltaTime:   1.0 / FixedUpdateRate,
 		LastFixedUpdate:  time.Now(),
 		WaveManager:      waveManager,
+		IsPaused:         true,
 	}
 }
 
@@ -200,6 +203,7 @@ func (g *Game) Update() {
 }
 
 func (g *Game) FixedUpdate() {
+
 	fixedFrameCounter++
 
 	// Player
@@ -271,9 +275,20 @@ func (g *Game) Run() {
 	for !rl.WindowShouldClose() {
 
 		now := time.Now()
-		deltaTime := time.Since(g.LastFixedUpdate).Seconds()
-		g.LastFixedUpdate = now
-		accumulatedTime += deltaTime
+		deltaTime := time.Since(g.LastFrameTime).Seconds()
+		g.LastFrameTime = now
+
+		// Cap the deltaTime to 100ms
+		if deltaTime > 0.1 {
+			deltaTime = 0.1
+		}
+
+		//g.LastFixedUpdate = now
+
+		// Do not update the game if it is paused
+		if g.currentGameState != Paused {
+			accumulatedTime += deltaTime
+		}
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
@@ -289,13 +304,17 @@ func (g *Game) Run() {
 			rl.DrawText("Press Enter to Start", int32(rl.GetScreenWidth()/2-325), int32(rl.GetScreenHeight()/2), 50, rl.White)
 
 			if rl.IsKeyPressed(rl.KeyEnter) {
+
+				// Reset the accumulated time
+				accumulatedTime = 0.0
+
 				g.ChangeGameState(Playing)
 			}
 
 		case Playing:
 
 			// Update the GameTime in seconds
-			g.GameTime += float32(rl.GetFrameTime())
+			g.GameTime += float32(deltaTime)
 
 			rl.BeginMode2D(g.Camera)
 
@@ -307,7 +326,7 @@ func (g *Game) Run() {
 				g.FixedUpdate()
 
 				// Reset the last fixed update time
-				g.LastFixedUpdate = now
+				// g.LastFixedUpdate = now
 				accumulatedTime -= float64(g.FixedDeltaTime)
 
 			}
@@ -330,8 +349,27 @@ func (g *Game) Run() {
 			g.RenderFPS()
 		case Paused:
 			// TODO: Implement the Paused state
+
+			g.IsPaused = true
+
 		case LeveledUp:
 			// TODO: Implement the LeveledUp state
+
+			g.IsPaused = true
+
+			rl.ClearBackground(rl.Black)
+
+			rl.DrawText("Select Skill", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2-200), 200, rl.Yellow)
+			rl.DrawText("Press Enter to Continue", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2), 50, rl.White)
+
+			if rl.IsKeyPressed(rl.KeyEnter) {
+
+				// Reset the accumulated time
+				accumulatedTime = 0.0
+
+				g.ChangeGameState(Playing)
+			}
+
 		case GameOver:
 			// TODO: Implement the GameOver state
 			rl.ClearBackground(rl.Black)
@@ -343,9 +381,26 @@ func (g *Game) Run() {
 }
 
 func (g *Game) ChangeGameState(state GameState) {
-	g.currentGameState = state
 
-	rl.TraceLog(rl.LogDebug, "GameState changed to: %s", state)
+	switch state {
+	case MainMenu:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to MainMenu")
+		g.IsPaused = true
+	case Playing:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to Playing")
+		g.IsPaused = false
+	case Paused:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to Paused")
+		g.IsPaused = true
+	case LeveledUp:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to LeveledUp")
+		g.IsPaused = true
+	case GameOver:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to GameOver")
+		g.IsPaused = true
+	}
+
+	g.currentGameState = state
 }
 
 func (g *Game) SpawnPlayer() {

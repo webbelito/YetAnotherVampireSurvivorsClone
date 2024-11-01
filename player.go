@@ -151,6 +151,7 @@ func (p *PlayerCharacter) Update(g *Game) {
 	// Check if we should Level Up
 	if p.Experience >= p.RequiredExperience {
 		p.LevelUp()
+		g.ChangeGameState(LeveledUp)
 	}
 }
 
