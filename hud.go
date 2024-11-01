@@ -59,7 +59,7 @@ func (h *HUD) RenderHealthBar() {
 	textXPosition := int32(10)
 	textYPosition := int32(60)
 
-	rl.DrawText(healthText, textXPosition, textYPosition, 20, rl.Red)
+	rl.DrawText(healthText, textXPosition, textYPosition, 24, rl.Red)
 }
 
 func (h *HUD) RenderExperienceBar() {
@@ -84,12 +84,16 @@ func (h *HUD) RenderExperienceBar() {
 	rl.DrawRectangle(posX, posY, experienceBarWidth, barHeight, rl.Blue)
 
 	// Draw the experience text
-	experienceText := fmt.Sprintf("Level: %d Experience: %d/%d", level, currentExperience, maxExperience)
+	levelText := fmt.Sprintf("Level: %d", level)
+	experienceText := fmt.Sprintf("XP: %d/%d", currentExperience, maxExperience)
 
-	textXPosition := int32(rl.GetScreenWidth() - 300)
-	textYPosition := int32(barHeight + 10)
+	levelTextXPos := int32(rl.GetScreenWidth() - 200)
+	levelTextYPos := int32(barHeight + 10)
+	experienceTextXPos := int32(rl.GetScreenWidth() - 200)
+	experienceTextYPos := int32(barHeight + 40)
 
-	rl.DrawText(experienceText, textXPosition, textYPosition, 20, rl.Black)
+	rl.DrawText(levelText, levelTextXPos, levelTextYPos, 24, rl.White)
+	rl.DrawText(experienceText, experienceTextXPos, experienceTextYPos, 24, rl.White)
 
 }
 
@@ -151,11 +155,11 @@ func (h *HUD) RenderGameTime(g *Game) {
 
 	} else if displaySeconds && displayMinutes && !displayHours {
 
-		textXPosition = int32(rl.GetScreenWidth()/2 - 25)
+		textXPosition = int32(rl.GetScreenWidth()/2 - 10)
 
 	} else {
 		textXPosition = int32(rl.GetScreenWidth()/2 - 50)
 	}
 
-	rl.DrawText(gameTime, textXPosition, textYPosition, 40, rl.White)
+	rl.DrawText(gameTime, textXPosition, textYPosition, 48, rl.White)
 }
