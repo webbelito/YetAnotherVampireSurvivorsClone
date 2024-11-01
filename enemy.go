@@ -108,9 +108,10 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		e.ExperienceValue = 10
 
 		// Animation
-		e.totalFrames = 1
+		e.totalFrames = 8
 		e.framesWidth = 32
 		e.framesHeight = 32
+		e.frameTime = 0.2
 	default:
 		rl.TraceLog(rl.LogError, "NewEnemy: Default Case, Unknown enemy type")
 	}
