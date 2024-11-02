@@ -58,7 +58,7 @@ func (eg *ExperienceGem) CheckCollision(p *PlayerCharacter) bool {
 
 func (eg *ExperienceGem) MoveTowardsPlayer(p *PlayerCharacter) {
 	if eg.Active && rl.CheckCollisionCircleRec(rl.Vector2{X: p.X, Y: p.Y}, float32(p.ExperienceGemCollectRadius), eg.Rec) {
-		eg.Position = rl.Vector2Lerp(eg.Position, rl.Vector2{X: p.X, Y: p.Y}, 0.05)
+		eg.Position = rl.Vector2Lerp(eg.Position, rl.Vector2{X: p.X, Y: p.Y}, 0.07)
 	}
 }
 

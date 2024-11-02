@@ -86,10 +86,27 @@ func NewGame() *Game {
 	// Wave Manager stuffs
 	waveManager := &WaveManager{
 		Waves: []Wave{
+			// Create 20 waves of enemies
 			{EnemyCounts: map[EnemyType]int{Bat: 50}, SpawnInterval: 0.5, Duration: 10.0},
 			{EnemyCounts: map[EnemyType]int{Bat: 100}, SpawnInterval: 0.3, Duration: 20.0},
 			{EnemyCounts: map[EnemyType]int{Bat: 150}, SpawnInterval: 0.1, Duration: 30.0},
 			{EnemyCounts: map[EnemyType]int{Bat: 150, Pumpkin: 50}, SpawnInterval: 0.1, Duration: 40.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 200, Pumpkin: 100}, SpawnInterval: 0.1, Duration: 50.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 250, Pumpkin: 150}, SpawnInterval: 0.1, Duration: 60.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 300, Pumpkin: 200}, SpawnInterval: 0.1, Duration: 70.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 350, Pumpkin: 250}, SpawnInterval: 0.1, Duration: 80.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 400, Pumpkin: 300}, SpawnInterval: 0.1, Duration: 90.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 450, Pumpkin: 350}, SpawnInterval: 0.1, Duration: 100.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 500, Pumpkin: 400}, SpawnInterval: 0.1, Duration: 110.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 550, Pumpkin: 450}, SpawnInterval: 0.1, Duration: 120.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 600, Pumpkin: 500}, SpawnInterval: 0.1, Duration: 130.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 650, Pumpkin: 550}, SpawnInterval: 0.1, Duration: 140.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 700, Pumpkin: 600}, SpawnInterval: 0.1, Duration: 150.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 750, Pumpkin: 650}, SpawnInterval: 0.1, Duration: 160.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 800, Pumpkin: 700}, SpawnInterval: 0.1, Duration: 170.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 850, Pumpkin: 750}, SpawnInterval: 0.1, Duration: 180.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 900, Pumpkin: 800}, SpawnInterval: 0.1, Duration: 190.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 950, Pumpkin: 850}, SpawnInterval: 0.1, Duration: 200.0},
 		},
 	}
 
