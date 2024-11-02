@@ -12,42 +12,43 @@ type Player interface {
 }
 
 type PlayerCharacter struct {
-	Name                  string
-	X                     float32
-	Y                     float32
-	PreviousPosition      rl.Vector2
-	Width                 int32
-	Height                int32
-	Collider              rl.Rectangle
-	ColliderAdjustment    rl.Vector2
-	Speed                 float32
-	directionX            int32
-	directionY            int32
-	targetDirection       rl.Vector2
-	Texture               rl.Texture2D
-	TextureSourceRect     rl.Rectangle
-	TextureBasePos        rl.Vector2
-	Health                float32
-	MaxHealth             float32
-	IsDead                bool
-	BaseExperience        int32
-	Experience            int32
-	RequiredExperience    int32
-	Level                 int32
-	Damage                float32
-	LastShotTime          float64
-	ShootCooldown         float32
-	LastMeleeTime         float64
-	MeleeAttackBasePos    rl.Vector2
-	MeleeAttackSourceRect rl.Rectangle
-	MeleeCooldown         float32
-	PlayMeleeAttack       bool
-	LastHomingTime        float64
-	HomingCooldown        float32
-	Projectiles           *[]*Projectile
-	AttackDirection       rl.Vector2
-	PowerUps              []*PowerUp
-	HUD                   *HUD
+	Name                       string
+	X                          float32
+	Y                          float32
+	PreviousPosition           rl.Vector2
+	Width                      int32
+	Height                     int32
+	Collider                   rl.Rectangle
+	ColliderAdjustment         rl.Vector2
+	Speed                      float32
+	directionX                 int32
+	directionY                 int32
+	targetDirection            rl.Vector2
+	Texture                    rl.Texture2D
+	TextureSourceRect          rl.Rectangle
+	TextureBasePos             rl.Vector2
+	Health                     float32
+	MaxHealth                  float32
+	IsDead                     bool
+	BaseExperience             int32
+	Experience                 int32
+	RequiredExperience         int32
+	ExperienceGemCollectRadius float32
+	Level                      int32
+	Damage                     float32
+	LastShotTime               float64
+	ShootCooldown              float32
+	LastMeleeTime              float64
+	MeleeAttackBasePos         rl.Vector2
+	MeleeAttackSourceRect      rl.Rectangle
+	MeleeCooldown              float32
+	PlayMeleeAttack            bool
+	LastHomingTime             float64
+	HomingCooldown             float32
+	Projectiles                *[]*Projectile
+	AttackDirection            rl.Vector2
+	PowerUps                   []*PowerUp
+	HUD                        *HUD
 
 	// TODO: Implement an animator for playing animations
 	// Idle Animation
@@ -69,36 +70,37 @@ type PlayerCharacter struct {
 
 func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32) *PlayerCharacter {
 	p := &PlayerCharacter{
-		Name:                  n,
-		X:                     float32(rl.GetScreenWidth()) / 2,
-		Y:                     float32(rl.GetScreenHeight()) / 2,
-		Width:                 w,
-		Height:                h,
-		Speed:                 s,
-		directionX:            0,
-		directionY:            0,
-		targetDirection:       rl.Vector2{X: 1, Y: 0},
-		Texture:               TextureAtlas,
-		TextureSourceRect:     rl.NewRectangle(0, 64, 32, 64),
-		Health:                health,
-		MaxHealth:             health,
-		BaseExperience:        10,
-		Experience:            0,
-		RequiredExperience:    CalculateXPForLevel(1, 10),
-		Level:                 1,
-		Damage:                d,
-		LastShotTime:          0,
-		ShootCooldown:         1,
-		MeleeAttackSourceRect: rl.NewRectangle(0, 254, 32, 64),
-		MeleeAttackBasePos:    rl.NewVector2(32, 0),
-		LastMeleeTime:         0,
-		MeleeCooldown:         2,
-		LastHomingTime:        0,
-		HomingCooldown:        5,
-		PowerUps:              make([]*PowerUp, 0),
-		frameIndex:            1,
-		frameTime:             0.1,
-		frameTimer:            0,
+		Name:                       n,
+		X:                          float32(rl.GetScreenWidth()) / 2,
+		Y:                          float32(rl.GetScreenHeight()) / 2,
+		Width:                      w,
+		Height:                     h,
+		Speed:                      s,
+		directionX:                 0,
+		directionY:                 0,
+		targetDirection:            rl.Vector2{X: 1, Y: 0},
+		Texture:                    TextureAtlas,
+		TextureSourceRect:          rl.NewRectangle(0, 64, 32, 64),
+		Health:                     health,
+		MaxHealth:                  health,
+		BaseExperience:             10,
+		Experience:                 0,
+		RequiredExperience:         CalculateXPForLevel(1, 10),
+		ExperienceGemCollectRadius: 64,
+		Level:                      1,
+		Damage:                     d,
+		LastShotTime:               0,
+		ShootCooldown:              1,
+		MeleeAttackSourceRect:      rl.NewRectangle(0, 254, 32, 64),
+		MeleeAttackBasePos:         rl.NewVector2(32, 0),
+		LastMeleeTime:              0,
+		MeleeCooldown:              2,
+		LastHomingTime:             0,
+		HomingCooldown:             5,
+		PowerUps:                   make([]*PowerUp, 0),
+		frameIndex:                 1,
+		frameTime:                  0.1,
+		frameTimer:                 0,
 
 		// Melee Animation
 		FrameIndexMelee: 1,

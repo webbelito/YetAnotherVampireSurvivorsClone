@@ -87,6 +87,7 @@ func NewEnemy(t rl.Texture2D, n string, w int32, h int32, health float32) *Enemy
 		e.totalFrames = 8
 		e.framesWidth = 32
 		e.framesHeight = 32
+
 	case "Pumpkin":
 
 		// Texture

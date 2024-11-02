@@ -27,11 +27,16 @@ func NewExperienceGem(x float32, y float32, a int32) *ExperienceGem {
 func (eg *ExperienceGem) FixedUpdate(g *Game) {
 
 	// Update the rectangle position
-
+	// Do we need to do this more than once?
 	if eg.Active {
-		eg.Rec.X = eg.Position.X
-		eg.Rec.Y = eg.Position.Y
+		if eg.Position.X != eg.Rec.X || eg.Position.Y != eg.Rec.Y {
+			eg.Rec.X = eg.Position.X
+			eg.Rec.Y = eg.Position.Y
+		}
 	}
+
+	// Move the experience gem towards the player
+	eg.MoveTowardsPlayer(g.Player)
 
 	// Check for collisions with the player
 	if eg.CheckCollision(g.Player) {
@@ -41,13 +46,20 @@ func (eg *ExperienceGem) FixedUpdate(g *Game) {
 }
 
 func (eg *ExperienceGem) CheckCollision(p *PlayerCharacter) bool {
-
 	if eg.Active {
+
 		if rl.CheckCollisionRecs(p.Collider, eg.Rec) {
 			return true
 		}
 	}
+
 	return false
+}
+
+func (eg *ExperienceGem) MoveTowardsPlayer(p *PlayerCharacter) {
+	if eg.Active && rl.CheckCollisionCircleRec(rl.Vector2{X: p.X, Y: p.Y}, float32(p.ExperienceGemCollectRadius), eg.Rec) {
+		eg.Position = rl.Vector2Lerp(eg.Position, rl.Vector2{X: p.X, Y: p.Y}, 0.05)
+	}
 }
 
 func (eg *ExperienceGem) RewardExperience(p *PlayerCharacter) {
