@@ -217,6 +217,9 @@ func (g *Game) Update() {
 		g.PowerUps[i].Update(g)
 	}
 
+	// Update Active Skills cooldown
+	g.SkillManager.Update(g)
+
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
 	g.DestroyPowerUp()
@@ -436,8 +439,8 @@ func (g *Game) SpawnPlayer() {
 	g.Player = NewPlayer("Bill", 32, 64, 300, 100, 50)
 }
 
-func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {
-	g.Projectiles = append(g.Projectiles, NewProjectile(TextureAtlas, x, y, radius, speed, direction, color, isHoming))
+func (g *Game) SpawnProjectile(t ProjectileType, x, y, radius, speed float32, direction rl.Vector2, color rl.Color) {
+	g.Projectiles = append(g.Projectiles, NewProjectile(t, x, y, radius, speed, direction, color))
 }
 
 func (g *Game) DestroyProjectiles() {
@@ -564,10 +567,10 @@ func (g *Game) CreateAllSkills() {
 	}
 
 	// Create a fireball skill
-	fireball := NewSkill("Fireball", 25, 100, 1, 8, true, []UpgradeEffect{
+	fireball := NewSkill("Fireball", 25, 100, 1, 8, true, 2, 10, 250, 1, []UpgradeEffect{
 
-		{AdditionalDamage: 0, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 25},
+		{AdditionalDamage: 1, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
+		{AdditionalProjectiles: 1, AdditionalDamage: 25},
 		{AdditionalProjectiles: 1},
 		{DamageMultiplier: 1.5, RangeMultiplier: 1.5},
 		{AdditionalProjectiles: 2},

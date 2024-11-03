@@ -113,3 +113,13 @@ func (sm *SkillManager) SelectRandomSkill() {
 	sm.SelectSkill(randomSkill)
 
 }
+
+func (sm *SkillManager) Update(g *Game) {
+
+	// Update the cooldowns of the active skills
+	for _, skill := range sm.ActiveSkills {
+		if skill.IsOnCooldown() {
+			skill.CooldownTimer -= rl.GetFrameTime()
+		}
+	}
+}

@@ -5,6 +5,7 @@ import (
 )
 
 type Projectile struct {
+	ProjectileType    ProjectileType
 	X                 float32
 	Y                 float32
 	PreviousPosition  rl.Vector2
@@ -19,30 +20,43 @@ type Projectile struct {
 	IsHoming          bool
 }
 
+type ProjectileType int
+
+const (
+	Bullet ProjectileType = iota
+	Homing
+	Fireball
+)
+
 type ProjectileSpawner interface {
 	SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2)
 }
 
-func NewProjectile(t rl.Texture2D, x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) *Projectile {
+func NewProjectile(t ProjectileType, x, y, radius, speed float32, direction rl.Vector2, color rl.Color) *Projectile {
 
 	p := Projectile{
-		X:         x,
-		Y:         y,
-		Radius:    radius,
-		Texture:   t,
-		Speed:     speed,
-		Active:    true,
-		Direction: direction,
-		Color:     color,
-		IsHoming:  isHoming,
+		ProjectileType: t,
+		X:              x,
+		Y:              y,
+		Radius:         radius,
+		Texture:        TextureAtlas,
+		Speed:          speed,
+		Active:         true,
+		Direction:      direction,
+		Color:          color,
 	}
 
-	switch isHoming {
-	case true:
-		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 224, Width: 32, Height: 32}
-
-	case false:
+	switch t {
+	case Bullet:
 		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 192, Width: 32, Height: 32}
+
+	case Homing:
+		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 224, Width: 32, Height: 32}
+		p.IsHoming = true
+
+	case Fireball:
+		p.TextureSourceRect = rl.Rectangle{X: 0, Y: 416, Width: 32, Height: 32}
+
 	}
 
 	return &p
