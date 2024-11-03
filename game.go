@@ -552,19 +552,19 @@ func (g *Game) CreateAllSkills() {
 	}
 
 	// Create a bullet skill
-	bullet := NewSkill("Bullet", 10, 100, 1, 8, true, 0, 10, 400, 0, []UpgradeEffect{
-		{AdditionalDamage: 1, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 2, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 3, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 4, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 5, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 6, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 7, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
-		{AdditionalDamage: 8, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
+	bullet := NewSkill("Bullet", 10, 100, 1, 8, 1, 0, 10, 400, 0, []UpgradeEffect{
+		{CooldownReduction: 0.1},
+		{CooldownReduction: 0.15},
+		{CooldownReduction: 0.2},
+		{CooldownReduction: 0.25},
+		{CooldownReduction: 0.3},
+		{CooldownReduction: 0.35},
+		{CooldownReduction: 0.4},
+		{CooldownReduction: 0.45},
 	})
 
 	// Create a fireball skill
-	fireball := NewSkill("Fireball", 25, 100, 1, 8, true, 2, 10, 250, 1, []UpgradeEffect{
+	fireball := NewSkill("Fireball", 25, 100, 1, 8, 1, 2, 10, 250, 1, []UpgradeEffect{
 
 		{AdditionalDamage: 1, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
 		{AdditionalProjectiles: 1, AdditionalDamage: 25},
@@ -576,7 +576,20 @@ func (g *Game) CreateAllSkills() {
 		{DamageMultiplier: 2, RangeMultiplier: 2},
 	})
 
+	// Create a magic orb skill
+	magicOrb := NewSkill("Magic Orb", 50, 100, 10, 8, 1, 1, 10, 200, 2, []UpgradeEffect{
+		{AdditionalDamage: 50},
+		{AdditionalProjectiles: 2, AdditionalDamage: 50},
+		{AdditionalProjectiles: 3, AdditionalDamage: 50},
+		{AdditionalProjectiles: 4, AdditionalDamage: 50},
+		{AdditionalProjectiles: 5, AdditionalDamage: 50},
+		{AdditionalProjectiles: 6, AdditionalDamage: 50},
+		{AdditionalProjectiles: 7, AdditionalDamage: 50},
+		{AdditionalProjectiles: 8, AdditionalDamage: 50},
+	})
+
 	// Add the skills to the SkillManager
+	g.SkillManager.AddSkill(magicOrb)
 	g.SkillManager.AddSkill(bullet)
 	g.SkillManager.AddSkill(fireball)
 

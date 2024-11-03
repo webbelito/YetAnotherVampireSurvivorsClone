@@ -24,7 +24,7 @@ type Skill struct {
 	LastUsed          float32
 	CurrentLevel      int
 	MaxLevel          int
-	IsProjectile      bool
+	ProjectilesCount  int
 	ProjectileType    ProjectileType
 	ProjectileRadius  float32
 	ProjectileSpeed   float32
@@ -40,7 +40,7 @@ type UpgradeEffect struct {
 	IsPiercing            bool
 }
 
-func NewSkill(name string, damage float32, baseRange float32, cooldown float32, maxLevel int, isProjectile bool, projectileType ProjectileType, projectileRadius float32, projectileSpeed float32, projectilePattern ProjectilePattern, upgradePath []UpgradeEffect) *Skill {
+func NewSkill(name string, damage float32, baseRange float32, cooldown float32, maxLevel int, projectilesCount int, projectileType ProjectileType, projectileRadius float32, projectileSpeed float32, projectilePattern ProjectilePattern, upgradePath []UpgradeEffect) *Skill {
 	return &Skill{
 		Name:              name,
 		BaseDamage:        damage,
@@ -48,7 +48,7 @@ func NewSkill(name string, damage float32, baseRange float32, cooldown float32, 
 		BaseCooldown:      cooldown,
 		CurrentLevel:      1,
 		MaxLevel:          maxLevel,
-		IsProjectile:      isProjectile,
+		ProjectilesCount:  projectilesCount,
 		ProjectileType:    projectileType,
 		ProjectileRadius:  projectileRadius,
 		ProjectileSpeed:   projectileSpeed,
@@ -102,10 +102,10 @@ func (s *Skill) Use(g *Game) {
 	s.TriggerCooldown()
 
 	// Check if we have a projectile skill
-	if s.IsProjectile {
+	if s.ProjectilesCount > 0 {
 
 		// Get the amount of projectiles to spawn
-		amountOfProjectiles := s.UpgradePath[s.CurrentLevel-1].AdditionalProjectiles + 1
+		amountOfProjectiles := s.UpgradePath[s.CurrentLevel-1].AdditionalProjectiles + s.ProjectilesCount
 
 		if s.ProjectilePattern == Single {
 
@@ -150,8 +150,11 @@ func (s *Skill) Use(g *Game) {
 				angleStep = baseAngle
 			}
 
+			// Offset distance from the player's center
+			offsetDistance := float32(20)
+
 			// Get the spawn position of the projectiles
-			spawnPos := rl.Vector2{
+			playerCenter := rl.Vector2{
 				X: g.Player.X + float32(g.Player.Width)/2,
 				Y: g.Player.Y + float32(g.Player.Height)/2,
 			}
@@ -164,6 +167,12 @@ func (s *Skill) Use(g *Game) {
 
 				// Calculate the direction of the projectile
 				direction := rl.Vector2{X: float32(math.Cos(angle)), Y: float32(math.Sin(angle))}
+
+				// SpawnPos is the player's center plus the direction times the offset distance
+				spawnPos := rl.Vector2{
+					X: playerCenter.X + direction.X*offsetDistance,
+					Y: playerCenter.Y + direction.Y*offsetDistance,
+				}
 
 				// Create a new projectile
 				// Ask the ProjectileManager to create a new projectile
@@ -178,11 +187,54 @@ func (s *Skill) Use(g *Game) {
 				)
 
 			}
-		}
-
-		if s.ProjectilePattern == Surround {
+		} else if s.ProjectilePattern == Surround {
 			// Create a surround of projectiles around the player
-		}
 
+			// Calculate the spread of 360 degrees
+			fullCircle := math.Pi * 2
+
+			// Calculate the angle step on the number of projectiles
+			angleStep := fullCircle / float64(amountOfProjectiles)
+
+			playerCenter := rl.Vector2{
+				X: g.Player.X + float32(g.Player.Width)/2,
+				Y: g.Player.Y + float32(g.Player.Height)/2,
+			}
+
+			// Offset distance from the player's center
+			offsetDistance := float32(50)
+
+			// For each projectile find a spawn point around the player
+			for i := 0; i < amountOfProjectiles; i++ {
+
+				// Calculate the angle of the projectile
+				angle := angleStep * float64(i)
+
+				// Calculate the direction of the projectile
+				direction := rl.Vector2{X: float32(math.Cos(angle)), Y: float32(math.Sin(angle))}
+
+				spawnPos := rl.Vector2{
+					X: playerCenter.X + direction.X*offsetDistance,
+					Y: playerCenter.Y + direction.Y*offsetDistance,
+				}
+
+				// Create a new projectile
+				// Ask the ProjectileManager to create a new projectile
+				g.SpawnProjectile(
+					s.ProjectileType,
+					spawnPos.X,
+					spawnPos.Y,
+					s.BaseDamage,
+					s.ProjectileSpeed,
+					direction,
+					rl.Red,
+				)
+
+				rl.TraceLog(rl.LogInfo, "Spawned projectile at %v", spawnPos)
+
+			}
+
+			rl.TraceLog(rl.LogInfo, "Spawned %v projectiles", amountOfProjectiles)
+		}
 	}
 }
