@@ -149,6 +149,11 @@ func (g *Game) Update() {
 		g.Player.HUD = NewHUD(g.Player)
 	}
 
+	// Check if we need to create all the skills
+	if g.SkillManager != nil && len(g.SkillManager.AllSkills) == 0 {
+		g.CreateAllSkills()
+	}
+
 	// Spawn an enemy
 	if rl.IsKeyPressed(rl.KeyB) {
 
@@ -386,6 +391,8 @@ func (g *Game) Run() {
 
 			if rl.IsKeyPressed(rl.KeyEnter) {
 
+				g.SkillManager.SelectRandomSkill()
+
 				// Reset the accumulated time
 				accumulatedTime = 0.0
 
@@ -546,4 +553,30 @@ func (g *Game) DestroyPowerUp() {
 
 func (g *Game) SpawnExperienceGem(x float32, y float32, amount int32) {
 	g.ExperienceGems = append(g.ExperienceGems, NewExperienceGem(x, y, amount))
+}
+
+func (g *Game) CreateAllSkills() {
+
+	// Check that we have a valid SkillManager
+	if g.SkillManager == nil {
+		rl.TraceLog(rl.LogError, "SkillManager is nil")
+		return
+	}
+
+	// Create a fireball skill
+	fireball := NewSkill("Fireball", 25, 100, 1, 8, true, []UpgradeEffect{
+
+		{AdditionalDamage: 0, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
+		{AdditionalDamage: 25},
+		{AdditionalProjectiles: 1},
+		{DamageMultiplier: 1.5, RangeMultiplier: 1.5},
+		{AdditionalProjectiles: 2},
+		{IsPiercing: true},
+		{AdditionalProjectiles: 3},
+		{DamageMultiplier: 2, RangeMultiplier: 2},
+	})
+
+	// Add the skill to the SkillManager
+	g.SkillManager.AddSkill(fireball)
+
 }

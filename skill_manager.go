@@ -14,7 +14,7 @@ func NewSkillManager() *SkillManager {
 	}
 }
 
-func (sm *SkillManager) AddSkillToAllSkills(skill *Skill) {
+func (sm *SkillManager) AddSkill(skill *Skill) {
 	sm.AllSkills[skill.Name] = skill
 }
 
@@ -65,18 +65,26 @@ func (sm *SkillManager) GetSkillByIndex(index int32) *Skill {
 
 func (sm *SkillManager) SelectRandomSkill() {
 
-	// Create a random number between 0 and the number of skills
-	randomSkillIndex := rl.GetRandomValue(0, int32(len(sm.AllSkills)))
+	// Create a random number between 1 and the number of skills
+	randomSkillNumber := rl.GetRandomValue(1, int32(len(sm.AllSkills)))
+
+	randomSkillIndex := randomSkillNumber - 1
 
 	// Get the skill at the random index
 	randomSkill := sm.GetSkillByIndex(randomSkillIndex)
 
 	if sm.HasSkill(randomSkill.Name) {
 
-		// If the skill is already active, try again
-		sm.SelectRandomSkill()
-		return
+		// Check if we can upgrade the skill
+		if randomSkill.IsUpgradable() {
+			randomSkill.Upgrade()
+		} else {
 
+			// If the skill is already active, try again
+			// TODO: Make sure we don't get stuck in an infinite loop
+			sm.SelectRandomSkill()
+			return
+		}
 	}
 
 	// Add the skill to the active skills list

@@ -25,6 +25,7 @@ func (h *HUD) Render(g *Game) {
 	h.RenderHealthBar()
 	h.RenderExperienceBar()
 	h.RenderGameTime(g)
+	h.RenderActiveSkills(g)
 
 	if h.LeveledUp && h.LeveledUpDuration > 0 {
 		h.RenderLeveledUp()
@@ -117,6 +118,25 @@ func (h *HUD) RenderLeveledUp() {
 		// Reset the level up text
 		h.LeveledUp = false
 		h.LeveledUpDuration = 2
+
+	}
+}
+
+func (h *HUD) RenderActiveSkills(g *Game) {
+
+	i := int32(0)
+
+	// Draw the active skills
+	for _, skill := range g.SkillManager.ActiveSkills {
+
+		skillText := fmt.Sprintf("%s Lvl: %d", skill.Name, skill.CurrentLevel)
+
+		textXPosition := int32(10)
+		textYPosition := int32(200 + i*30)
+
+		rl.DrawText(skillText, textXPosition, textYPosition, 24, rl.Orange)
+
+		i++
 
 	}
 }
