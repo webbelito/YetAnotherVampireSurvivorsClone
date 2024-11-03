@@ -149,22 +149,6 @@ func (p *PlayerCharacter) Update(g *Game) {
 
 	}
 
-	// TODO: Implement a better way to handle loadouts
-	/*if p.Level >= 1 {
-		p.Fire(g)
-	}
-	*/
-
-	/* TODO: Move these to the skill manager
-	if p.Level >= 2 {
-		p.Melee(g)
-	}
-
-	if p.Level >= 4 {
-		p.ShootHoming(g)
-	}
-	*/
-
 	// Check if we should Level Up
 	if p.Experience >= p.RequiredExperience {
 		p.LevelUp()

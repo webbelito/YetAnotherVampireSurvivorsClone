@@ -123,35 +123,46 @@ func (s *Skill) Use(g *Game) {
 				g.SpawnProjectile(s.ProjectileType, spawnPos.X, spawnPos.Y, s.BaseDamage, s.ProjectileSpeed, direction, rl.Red)
 			}
 		} else if s.ProjectilePattern == Cone {
-			// Create a cone of projectiles
 
+			// Creates a cone of projectiles
+
+			// Get the spread of the cone
 			coneSpread := math.Pi / 4
 
+			// Get the direction of the player
 			targetDir := rl.Vector2Normalize(g.Player.targetDirection)
 
+			// Calculate the base angle of the cone
 			baseAngle := math.Atan2(float64(targetDir.Y), float64(targetDir.X))
 
+			// Calculate the start and end angle of the cone
 			startAngle := baseAngle - coneSpread/2
 			endAngle := baseAngle + coneSpread/2
 
 			var angleStep float64
 
+			// Calculate the angle step
 			if amountOfProjectiles > 1 {
 				angleStep = (endAngle - startAngle) / float64(amountOfProjectiles-1)
+
+				// Otherwise just use the base angle
 			} else {
 				angleStep = baseAngle
 			}
 
+			// Get the spawn position of the projectiles
 			spawnPos := rl.Vector2{
 				X: g.Player.X + float32(g.Player.Width)/2,
 				Y: g.Player.Y + float32(g.Player.Height)/2,
 			}
 
+			// For each projectile find a spawn point around the player
 			for i := 0; i < amountOfProjectiles; i++ {
 
 				// Calculate the angle of the projectile
 				angle := startAngle + angleStep*float64(i)
 
+				// Calculate the direction of the projectile
 				direction := rl.Vector2{X: float32(math.Cos(angle)), Y: float32(math.Sin(angle))}
 
 				// Create a new projectile
