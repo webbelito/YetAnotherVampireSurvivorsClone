@@ -23,6 +23,7 @@ type Game struct {
 	LastFrameTime    time.Time
 	GameTime         float32
 	WaveManager      *WaveManager
+	SkillManager     *SkillManager
 	IsPaused         bool
 }
 
@@ -88,27 +89,15 @@ func NewGame() *Game {
 		Waves: []Wave{
 			// Create 20 waves of enemies
 			{EnemyCounts: map[EnemyType]int{Bat: 50}, SpawnInterval: 0.5, Duration: 10.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 100}, SpawnInterval: 0.3, Duration: 20.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 150}, SpawnInterval: 0.1, Duration: 30.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 150, Pumpkin: 50}, SpawnInterval: 0.1, Duration: 40.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 200, Pumpkin: 100}, SpawnInterval: 0.1, Duration: 50.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 250, Pumpkin: 150}, SpawnInterval: 0.1, Duration: 60.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 300, Pumpkin: 200}, SpawnInterval: 0.1, Duration: 70.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 350, Pumpkin: 250}, SpawnInterval: 0.1, Duration: 80.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 400, Pumpkin: 300}, SpawnInterval: 0.1, Duration: 90.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 450, Pumpkin: 350}, SpawnInterval: 0.1, Duration: 100.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 500, Pumpkin: 400}, SpawnInterval: 0.1, Duration: 110.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 550, Pumpkin: 450}, SpawnInterval: 0.1, Duration: 120.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 600, Pumpkin: 500}, SpawnInterval: 0.1, Duration: 130.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 650, Pumpkin: 550}, SpawnInterval: 0.1, Duration: 140.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 700, Pumpkin: 600}, SpawnInterval: 0.1, Duration: 150.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 750, Pumpkin: 650}, SpawnInterval: 0.1, Duration: 160.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 800, Pumpkin: 700}, SpawnInterval: 0.1, Duration: 170.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 850, Pumpkin: 750}, SpawnInterval: 0.1, Duration: 180.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 900, Pumpkin: 800}, SpawnInterval: 0.1, Duration: 190.0},
-			{EnemyCounts: map[EnemyType]int{Bat: 950, Pumpkin: 850}, SpawnInterval: 0.1, Duration: 200.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 50}, SpawnInterval: 0.3, Duration: 20.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 50}, SpawnInterval: 0.1, Duration: 30.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 50, Pumpkin: 50}, SpawnInterval: 0.1, Duration: 40.0},
+			{EnemyCounts: map[EnemyType]int{Bat: 100, Pumpkin: 100}, SpawnInterval: 0.1, Duration: 50.0},
 		},
 	}
+
+	// TODO: Load the skills
+	skillManager := NewSkillManager()
 
 	return &Game{
 		currentGameState: MainMenu,
@@ -121,6 +110,7 @@ func NewGame() *Game {
 		FixedDeltaTime:   1.0 / FixedUpdateRate,
 		LastFixedUpdate:  time.Now(),
 		WaveManager:      waveManager,
+		SkillManager:     skillManager,
 		IsPaused:         true,
 	}
 }
@@ -142,6 +132,11 @@ func (g *Game) Update() {
 	// Initialize the HUD
 	if g.Player.HUD == nil {
 		g.Player.HUD = NewHUD(g.Player)
+	}
+
+	// Check if we need to create all the skills
+	if g.SkillManager != nil && len(g.SkillManager.AllSkills) == 0 {
+		g.CreateAllSkills()
 	}
 
 	// Spawn an enemy
@@ -206,6 +201,9 @@ func (g *Game) Update() {
 	for i := 0; i < len(g.PowerUps); i++ {
 		g.PowerUps[i].Update(g)
 	}
+
+	// Update Active Skills cooldown
+	g.SkillManager.Update(g)
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
@@ -376,10 +374,12 @@ func (g *Game) Run() {
 
 			rl.ClearBackground(rl.Black)
 
-			rl.DrawText("Select Skill", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2-200), 200, rl.Yellow)
-			rl.DrawText("Press Enter to Continue", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2), 50, rl.White)
+			rl.DrawText("Random reward selected", int32(rl.GetScreenWidth()/2-550), int32(rl.GetScreenHeight()/2-200), 100, rl.Yellow)
+			rl.DrawText("Press Enter to Continue", int32(rl.GetScreenWidth()/2-300), int32(rl.GetScreenHeight()/2), 50, rl.White)
 
 			if rl.IsKeyPressed(rl.KeyEnter) {
+
+				g.SkillManager.SelectRandomSkill()
 
 				// Reset the accumulated time
 				accumulatedTime = 0.0
@@ -424,8 +424,8 @@ func (g *Game) SpawnPlayer() {
 	g.Player = NewPlayer("Bill", 32, 64, 300, 100, 50)
 }
 
-func (g *Game) SpawnProjectile(x, y, radius, speed float32, direction rl.Vector2, color rl.Color, isHoming bool) {
-	g.Projectiles = append(g.Projectiles, NewProjectile(TextureAtlas, x, y, radius, speed, direction, color, isHoming))
+func (g *Game) SpawnProjectile(t ProjectileType, x, y, radius, speed float32, direction rl.Vector2, color rl.Color) {
+	g.Projectiles = append(g.Projectiles, NewProjectile(t, x, y, radius, speed, direction, color))
 }
 
 func (g *Game) DestroyProjectiles() {
@@ -541,4 +541,58 @@ func (g *Game) DestroyPowerUp() {
 
 func (g *Game) SpawnExperienceGem(x float32, y float32, amount int32) {
 	g.ExperienceGems = append(g.ExperienceGems, NewExperienceGem(x, y, amount))
+}
+
+func (g *Game) CreateAllSkills() {
+
+	// Check that we have a valid SkillManager
+	if g.SkillManager == nil {
+		rl.TraceLog(rl.LogError, "SkillManager is nil")
+		return
+	}
+
+	// Create a bullet skill
+	bullet := NewSkill("Bullet", 10, 200, 1, 8, 1, 0, 10, 400, 0, []UpgradeEffect{
+		{CooldownReduction: 0.1},
+		{CooldownReduction: 0.15},
+		{CooldownReduction: 0.2},
+		{CooldownReduction: 0.25},
+		{CooldownReduction: 0.3},
+		{CooldownReduction: 0.35},
+		{CooldownReduction: 0.4},
+		{CooldownReduction: 0.45},
+	})
+
+	// Create a fireball skill
+	fireball := NewSkill("Fireball", 25, 100, 1, 8, 1, 2, 10, 250, 1, []UpgradeEffect{
+
+		{AdditionalDamage: 1, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
+		{AdditionalProjectiles: 1, AdditionalDamage: 25},
+		{AdditionalProjectiles: 1},
+		{AdditionalProjectiles: 1, DamageMultiplier: 1.5, RangeMultiplier: 1.5},
+		{AdditionalProjectiles: 2},
+		{AdditionalProjectiles: 2, IsPiercing: true},
+		{AdditionalProjectiles: 3},
+		{DamageMultiplier: 2, RangeMultiplier: 2},
+	})
+
+	// Create a magic orb skill
+	magicOrb := NewSkill("Magic Orb", 50, 100, 10, 8, 1, 1, 10, 200, 2, []UpgradeEffect{
+		{AdditionalDamage: 50},
+		{AdditionalProjectiles: 2, AdditionalDamage: 50},
+		{AdditionalProjectiles: 3, AdditionalDamage: 50},
+		{AdditionalProjectiles: 4, AdditionalDamage: 50},
+		{AdditionalProjectiles: 5, AdditionalDamage: 50},
+		{AdditionalProjectiles: 6, AdditionalDamage: 50},
+		{AdditionalProjectiles: 7, AdditionalDamage: 50},
+		{AdditionalProjectiles: 8, AdditionalDamage: 50},
+	})
+
+	// Add the skills to the SkillManager
+	g.SkillManager.AddSkill(magicOrb)
+	g.SkillManager.AddSkill(bullet)
+	g.SkillManager.AddSkill(fireball)
+
+	// Add bullet to the active skills
+	g.SkillManager.SelectSkill(bullet)
 }

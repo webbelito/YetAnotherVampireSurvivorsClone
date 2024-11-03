@@ -137,17 +137,16 @@ func NewPlayer(n string, w int32, h int32, s float32, health float32, d float32)
 func (p *PlayerCharacter) Update(g *Game) {
 	p.HandleInput()
 
-	// TODO: Implement a better way to handle loadouts
-	if p.Level >= 1 {
-		p.Fire(g)
-	}
+	// Iterate over the active skills and try to use them
+	for i := 0; i < len(g.SkillManager.ActiveSkills); i++ {
 
-	if p.Level >= 2 {
-		p.Melee(g)
-	}
+		// Get the skill from the skill manager
+		skill := g.SkillManager.GetActiveSkillByIndex(int32(i))
 
-	if p.Level >= 4 {
-		p.ShootHoming(g)
+		if !skill.IsOnCooldown() {
+			skill.Use(g)
+		}
+
 	}
 
 	// Check if we should Level Up
@@ -406,7 +405,7 @@ func (p *PlayerCharacter) Fire(g *Game) {
 		// Calculate the target direction based on the player's movement
 		direction := rl.Vector2Normalize(p.targetDirection)
 
-		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Black, false)
+		g.SpawnProjectile(0, float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Black)
 
 	}
 
@@ -510,7 +509,7 @@ func (p *PlayerCharacter) ShootHoming(g *Game) {
 
 		direction := rl.Vector2Normalize(rl.Vector2{X: p.X, Y: p.Y})
 
-		g.SpawnProjectile(float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Purple, true)
+		g.SpawnProjectile(1, float32(p.X+float32(p.Width)/2), float32(p.Y+float32(p.Height)/2), 5, 500, direction, rl.Purple)
 
 	}
 
