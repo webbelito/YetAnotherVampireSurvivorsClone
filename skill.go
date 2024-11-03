@@ -111,20 +111,18 @@ func (s *Skill) Use(g *Game) {
 
 			for i := 0; i < amountOfProjectiles; i++ {
 
-				/*
-					// Get the direction of the player
-					direction := g.Player.targetDirection
+				// Get the direction of the player
+				direction := g.Player.targetDirection
 
-					// Create a new projectile
-					// Ask the ProjectileManager to create a new projectile
-					g.SpawnProjectile(g.Player.X, g.Player.Y, s.BaseDamage, s.ProjectileSpeed, direction, rl.Red, false)
+				spawnPos := rl.Vector2{
+					X: g.Player.X + float32(g.Player.Width)/2,
+					Y: g.Player.Y + float32(g.Player.Height)/2,
+				}
 
-				*/
+				// Ask the ProjectileManager to create a new projectile
+				g.SpawnProjectile(s.ProjectileType, spawnPos.X, spawnPos.Y, s.BaseDamage, s.ProjectileSpeed, direction, rl.Red)
 			}
-
-		}
-
-		if s.ProjectilePattern == Cone {
+		} else if s.ProjectilePattern == Cone {
 			// Create a cone of projectiles
 
 			coneSpread := math.Pi / 4

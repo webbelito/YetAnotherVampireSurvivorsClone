@@ -141,7 +141,7 @@ func (p *PlayerCharacter) Update(g *Game) {
 	for i := 0; i < len(g.SkillManager.ActiveSkills); i++ {
 
 		// Get the skill from the skill manager
-		skill := g.SkillManager.GetSkillByIndex(int32(i))
+		skill := g.SkillManager.GetActiveSkillByIndex(int32(i))
 
 		if !skill.IsOnCooldown() {
 			skill.Use(g)
@@ -150,10 +150,12 @@ func (p *PlayerCharacter) Update(g *Game) {
 	}
 
 	// TODO: Implement a better way to handle loadouts
-	if p.Level >= 1 {
+	/*if p.Level >= 1 {
 		p.Fire(g)
 	}
+	*/
 
+	/* TODO: Move these to the skill manager
 	if p.Level >= 2 {
 		p.Melee(g)
 	}
@@ -161,6 +163,7 @@ func (p *PlayerCharacter) Update(g *Game) {
 	if p.Level >= 4 {
 		p.ShootHoming(g)
 	}
+	*/
 
 	// Check if we should Level Up
 	if p.Experience >= p.RequiredExperience {

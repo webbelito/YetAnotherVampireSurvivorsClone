@@ -75,6 +75,18 @@ func (sm *SkillManager) GetSkillByIndex(index int32) *Skill {
 	return nil
 }
 
+func (sm *SkillManager) GetActiveSkillByIndex(index int32) *Skill {
+	i := int32(0)
+	for _, skill := range sm.ActiveSkills {
+		if i == index {
+			return skill
+		}
+		i++
+	}
+
+	return nil
+}
+
 func (sm *SkillManager) GetActiveSkillsCount() int {
 	return len(sm.ActiveSkills)
 }
