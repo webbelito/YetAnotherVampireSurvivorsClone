@@ -3,14 +3,16 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 type SkillManager struct {
-	AllSkills    map[string]*Skill
-	ActiveSkills map[string]*Skill
+	AllSkills       map[string]*Skill
+	ActiveSkills    map[string]*Skill
+	MaxActiveSkills int
 }
 
 func NewSkillManager() *SkillManager {
 	return &SkillManager{
-		AllSkills:    make(map[string]*Skill),
-		ActiveSkills: make(map[string]*Skill),
+		AllSkills:       make(map[string]*Skill),
+		ActiveSkills:    make(map[string]*Skill),
+		MaxActiveSkills: 8,
 	}
 }
 
@@ -30,6 +32,12 @@ func (sm *SkillManager) SelectSkill(skill *Skill) {
 		return
 	}
 
+	if sm.IsAtMaxActiveSkills() {
+		rl.TraceLog(rl.LogError, "Trying to add a skill when the max active skills limit has been reached")
+		return
+	}
+
+	// Add the skill to the active skills list
 	sm.ActiveSkills[skill.Name] = skill
 }
 
@@ -51,6 +59,10 @@ func (sm *SkillManager) GetActiveSkill(skillName string) *Skill {
 	return sm.ActiveSkills[skillName]
 }
 
+func (sm *SkillManager) IsAtMaxActiveSkills() bool {
+	return sm.GetActiveSkillsCount() >= sm.MaxActiveSkills
+}
+
 func (sm *SkillManager) GetSkillByIndex(index int32) *Skill {
 	i := int32(0)
 	for _, skill := range sm.AllSkills {
@@ -61,6 +73,10 @@ func (sm *SkillManager) GetSkillByIndex(index int32) *Skill {
 	}
 
 	return nil
+}
+
+func (sm *SkillManager) GetActiveSkillsCount() int {
+	return len(sm.ActiveSkills)
 }
 
 func (sm *SkillManager) SelectRandomSkill() {
@@ -80,8 +96,14 @@ func (sm *SkillManager) SelectRandomSkill() {
 			randomSkill.Upgrade()
 		} else {
 
-			// If the skill is already active, try again
 			// TODO: Make sure we don't get stuck in an infinite loop
+			// Check if all skills are active
+			if sm.GetActiveSkillsCount() == len(sm.AllSkills) {
+				rl.TraceLog(rl.LogInfo, "All skills are active")
+				return
+			}
+
+			// Try again
 			sm.SelectRandomSkill()
 			return
 		}
