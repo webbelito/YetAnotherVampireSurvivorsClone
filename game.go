@@ -421,12 +421,15 @@ func (g *Game) Run() {
 
 		case Victory:
 
-			victoryTimeText := fmt.Sprintf("Time: %.2f", g.GameTime)
+			victoryTimeMinutes := int(g.GameTime) / 60
+			victoryTimeSeconds := int(g.GameTime) % 60
+			victoryTimeText := fmt.Sprintf("Time: %d:%d", victoryTimeMinutes, victoryTimeSeconds)
 
 			rl.ClearBackground(rl.Black)
 			rl.DrawText("Victory", int32(rl.GetScreenWidth()/2-500), int32(rl.GetScreenHeight()/2-200), 200, rl.Green)
-
 			rl.DrawText(victoryTimeText, int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2), 50, rl.White)
+
+			rl.DrawText("Press Escape to Exit", int32(rl.GetScreenWidth()/2-300), int32(rl.GetScreenHeight()/2+200), 50, rl.White)
 
 		}
 
