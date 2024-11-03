@@ -25,6 +25,7 @@ type Game struct {
 	WaveManager      *WaveManager
 	SkillManager     *SkillManager
 	IsPaused         bool
+	IsPlayingMusic   bool
 }
 
 func NewGame() *Game {
@@ -99,6 +100,9 @@ func NewGame() *Game {
 	// TODO: Load the skills
 	skillManager := NewSkillManager()
 
+	// Play the background music
+	rl.PlayMusicStream(SoundTrack)
+
 	return &Game{
 		currentGameState: MainMenu,
 		Player:           nil,
@@ -112,7 +116,9 @@ func NewGame() *Game {
 		WaveManager:      waveManager,
 		SkillManager:     skillManager,
 		IsPaused:         true,
+		IsPlayingMusic:   true,
 	}
+
 }
 
 // TODO: Remove this with a proper way to handle frame updates
@@ -174,6 +180,16 @@ func (g *Game) Update() {
 		g.Player.GainExperience(10)
 	}
 
+	if rl.IsKeyPressed(rl.KeyM) {
+		if g.IsPlayingMusic {
+			rl.PauseMusicStream(SoundTrack)
+		} else {
+			rl.ResumeMusicStream(SoundTrack)
+		}
+
+		g.IsPlayingMusic = !g.IsPlayingMusic
+	}
+
 	// Update player
 	g.Player.Update(g)
 
@@ -204,6 +220,9 @@ func (g *Game) Update() {
 
 	// Update Active Skills cooldown
 	g.SkillManager.Update(g)
+
+	// Play the next frame of the music
+	rl.UpdateMusicStream(SoundTrack)
 
 	g.DestroyProjectiles()
 	g.DestroyEnemy()
@@ -368,8 +387,10 @@ func (g *Game) Run() {
 			g.IsPaused = true
 
 		case LeveledUp:
-			// TODO: Implement the LeveledUp state
+			// Update the music stream
+			rl.UpdateMusicStream(SoundTrack)
 
+			// Pause the game
 			g.IsPaused = true
 
 			rl.ClearBackground(rl.Black)
@@ -395,6 +416,10 @@ func (g *Game) Run() {
 
 		rl.EndDrawing()
 	}
+
+	rl.CloseAudioDevice()
+	rl.CloseWindow()
+
 }
 
 func (g *Game) ChangeGameState(state GameState) {

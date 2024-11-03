@@ -12,6 +12,7 @@ const SCREEN_TITLE = "YAVSC - Yet Another Vampire Survivors Clone"
 const DEBUG_MODE = true
 
 var TextureAtlas rl.Texture2D
+var SoundTrack rl.Music
 
 func main() {
 
@@ -23,6 +24,9 @@ func main() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 	defer rl.CloseWindow()
 
+	rl.InitAudioDevice()
+	defer rl.CloseAudioDevice()
+
 	// Load the atlas texture
 	TextureAtlas = rl.LoadTexture("assets/images/yavsc-atlas-sheet.png")
 	defer rl.UnloadTexture(TextureAtlas)
@@ -32,6 +36,15 @@ func main() {
 		rl.TraceLog(rl.LogError, "Failed to load the atlas texture")
 		return
 	}
+
+	// Load the sound track
+	SoundTrack = rl.LoadMusicStream("assets/music/default_soundtrack.mp3")
+	defer rl.UnloadMusicStream(SoundTrack)
+
+	// Set the sound track to loop
+	SoundTrack.Looping = true
+
+	rl.SetMasterVolume(0.5)
 
 	// Initialize the game
 	game := NewGame()
