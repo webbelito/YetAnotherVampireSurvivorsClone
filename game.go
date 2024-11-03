@@ -274,6 +274,11 @@ func (g *Game) FixedUpdate() {
 			waveManager.CurrentWaveIndex++
 		}
 	}
+
+	// Check win condidition
+	if g.WaveManager.CurrentWaveIndex >= len(g.WaveManager.Waves) && len(g.Enemies) == 0 {
+		g.ChangeGameState(Victory)
+	}
 }
 
 func (g *Game) Render(interpolation float64) {
@@ -411,7 +416,18 @@ func (g *Game) Run() {
 		case GameOver:
 			// TODO: Implement the GameOver state
 			rl.ClearBackground(rl.Black)
-			rl.DrawText("Game Over", int32(rl.GetScreenWidth()/2-500), int32(rl.GetScreenHeight()/2-200), 200, rl.Red)
+			rl.DrawText("Game Over", int32(rl.GetScreenWidth()/2-550), int32(rl.GetScreenHeight()/2-200), 200, rl.Red)
+			rl.DrawText("Press Escape to Exit", int32(rl.GetScreenWidth()/2-300), int32(rl.GetScreenHeight()/2), 50, rl.White)
+
+		case Victory:
+
+			victoryTimeText := fmt.Sprintf("Time: %.2f", g.GameTime)
+
+			rl.ClearBackground(rl.Black)
+			rl.DrawText("Victory", int32(rl.GetScreenWidth()/2-500), int32(rl.GetScreenHeight()/2-200), 200, rl.Green)
+
+			rl.DrawText(victoryTimeText, int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2), 50, rl.White)
+
 		}
 
 		rl.EndDrawing()
@@ -439,6 +455,9 @@ func (g *Game) ChangeGameState(state GameState) {
 		g.IsPaused = true
 	case GameOver:
 		rl.TraceLog(rl.LogDebug, "Changing GameState to GameOver")
+		g.IsPaused = true
+	case Victory:
+		rl.TraceLog(rl.LogDebug, "Changing GameState to Victory")
 		g.IsPaused = true
 	}
 
@@ -579,13 +598,13 @@ func (g *Game) CreateAllSkills() {
 	// Create a bullet skill
 	bullet := NewSkill("Bullet", 10, 200, 1, 8, 1, 0, 10, 400, 0, []UpgradeEffect{
 		{CooldownReduction: 0.1},
-		{CooldownReduction: 0.15},
 		{CooldownReduction: 0.2},
-		{CooldownReduction: 0.25},
 		{CooldownReduction: 0.3},
-		{CooldownReduction: 0.35},
 		{CooldownReduction: 0.4},
-		{CooldownReduction: 0.45},
+		{CooldownReduction: 0.5},
+		{CooldownReduction: 0.6},
+		{CooldownReduction: 0.7},
+		{CooldownReduction: 0.8},
 	})
 
 	// Create a fireball skill
@@ -593,12 +612,12 @@ func (g *Game) CreateAllSkills() {
 
 		{AdditionalDamage: 1, DamageMultiplier: 1, RangeMultiplier: 1, CooldownReduction: 0, IsPiercing: false},
 		{AdditionalProjectiles: 1, AdditionalDamage: 25},
-		{AdditionalProjectiles: 1},
-		{AdditionalProjectiles: 1, DamageMultiplier: 1.5, RangeMultiplier: 1.5},
 		{AdditionalProjectiles: 2},
-		{AdditionalProjectiles: 2, IsPiercing: true},
+		{AdditionalProjectiles: 2, DamageMultiplier: 1.5, RangeMultiplier: 1.5},
+		{AdditionalProjectiles: 2},
+		{AdditionalProjectiles: 3, IsPiercing: true},
 		{AdditionalProjectiles: 3},
-		{DamageMultiplier: 2, RangeMultiplier: 2},
+		{AdditionalProjectiles: 3, DamageMultiplier: 2, RangeMultiplier: 2},
 	})
 
 	// Create a magic orb skill

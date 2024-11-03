@@ -9,6 +9,7 @@ const (
 	Paused
 	LeveledUp
 	GameOver
+	Victory
 )
 
 func (g GameState) String() string {

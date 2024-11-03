@@ -470,9 +470,6 @@ func (p *PlayerCharacter) CalculcateMeleeAttackArea(length float32, baseWidth fl
 	// Normalize the attack direction
 	normalizedDirection := rl.Vector2Normalize(p.targetDirection)
 
-	// Normalize the attack towards the mouse
-	//normalizedDirection := rl.Vector2Normalize(rl.Vector2{X: float32(rl.GetMouseX()) - tipX, Y: float32(rl.GetMouseY()) - tipY})
-
 	// Calculate the base center (wide end of the triangle)
 	baseCenterX := tipX + normalizedDirection.X*length
 	baseCenterY := tipY + normalizedDirection.Y*length
