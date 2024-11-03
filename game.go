@@ -23,6 +23,7 @@ type Game struct {
 	LastFrameTime    time.Time
 	GameTime         float32
 	WaveManager      *WaveManager
+	SkillManager     *SkillManager
 	IsPaused         bool
 }
 
@@ -110,6 +111,9 @@ func NewGame() *Game {
 		},
 	}
 
+	// TODO: Load the skills
+	skillManager := NewSkillManager()
+
 	return &Game{
 		currentGameState: MainMenu,
 		Player:           nil,
@@ -121,6 +125,7 @@ func NewGame() *Game {
 		FixedDeltaTime:   1.0 / FixedUpdateRate,
 		LastFixedUpdate:  time.Now(),
 		WaveManager:      waveManager,
+		SkillManager:     skillManager,
 		IsPaused:         true,
 	}
 }
