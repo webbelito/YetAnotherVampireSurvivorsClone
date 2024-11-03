@@ -386,8 +386,8 @@ func (g *Game) Run() {
 
 			rl.ClearBackground(rl.Black)
 
-			rl.DrawText("Select Skill", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2-200), 200, rl.Yellow)
-			rl.DrawText("Press Enter to Continue", int32(rl.GetScreenWidth()/2-200), int32(rl.GetScreenHeight()/2), 50, rl.White)
+			rl.DrawText("Random Skill gained", int32(rl.GetScreenWidth()/2-500), int32(rl.GetScreenHeight()/2-200), 100, rl.Yellow)
+			rl.DrawText("Press Enter to Continue", int32(rl.GetScreenWidth()/2-300), int32(rl.GetScreenHeight()/2), 50, rl.White)
 
 			if rl.IsKeyPressed(rl.KeyEnter) {
 
