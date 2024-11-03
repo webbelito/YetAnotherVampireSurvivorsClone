@@ -552,7 +552,7 @@ func (g *Game) CreateAllSkills() {
 	}
 
 	// Create a bullet skill
-	bullet := NewSkill("Bullet", 10, 100, 1, 8, 1, 0, 10, 400, 0, []UpgradeEffect{
+	bullet := NewSkill("Bullet", 10, 200, 1, 8, 1, 0, 10, 400, 0, []UpgradeEffect{
 		{CooldownReduction: 0.1},
 		{CooldownReduction: 0.15},
 		{CooldownReduction: 0.2},

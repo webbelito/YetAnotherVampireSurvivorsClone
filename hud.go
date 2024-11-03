@@ -10,6 +10,7 @@ type HUD struct {
 	Player            *PlayerCharacter
 	LeveledUp         bool
 	LeveledUpDuration float32
+	SkillPositions    map[*Skill]rl.Vector2
 }
 
 func NewHUD(p *PlayerCharacter) *HUD {
@@ -17,6 +18,7 @@ func NewHUD(p *PlayerCharacter) *HUD {
 		Player:            p,
 		LeveledUp:         false,
 		LeveledUpDuration: 2,
+		SkillPositions:    make(map[*Skill]rl.Vector2),
 	}
 }
 
@@ -124,20 +126,26 @@ func (h *HUD) RenderLeveledUp() {
 
 func (h *HUD) RenderActiveSkills(g *Game) {
 
+	// Fixed starting position
+	basePos := rl.NewVector2(10, 200)
+	offsetY := int32(30)
+
 	i := int32(0)
 
-	// Draw the active skills
+	// Ensure each skill in ActiveSkills has a fixed position
 	for _, skill := range g.SkillManager.ActiveSkills {
-
-		skillText := fmt.Sprintf("%s Lvl: %d", skill.Name, skill.CurrentLevel)
-
-		textXPosition := int32(10)
-		textYPosition := int32(200 + i*30)
-
-		rl.DrawText(skillText, textXPosition, textYPosition, 24, rl.Orange)
 
 		i++
 
+		if _, exists := h.SkillPositions[skill]; !exists {
+			position := rl.NewVector2(basePos.X, basePos.Y+float32(i*offsetY))
+			h.SkillPositions[skill] = position
+		}
+
+		for skill, position := range h.SkillPositions {
+			skillText := fmt.Sprintf("%s Lvl: %d", skill.Name, skill.CurrentLevel)
+			rl.DrawText(skillText, int32(position.X), int32(position.Y), 24, rl.Orange)
+		}
 	}
 }
 
