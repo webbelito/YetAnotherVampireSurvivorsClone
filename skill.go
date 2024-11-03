@@ -184,14 +184,5 @@ func (s *Skill) Use(g *Game) {
 			// Create a surround of projectiles around the player
 		}
 
-		// For each projectile find a spawn point around the player
-		// Calculate the direction of the projectile
-
-		// Create a new projectile
-		// Ask the ProjectileManager to create a new projectile
-
 	}
-
-	rl.TraceLog(rl.LogInfo, "Using skill: %s", s.Name)
-
 }
