@@ -36,6 +36,11 @@ func NewSkill(name string, damage float32, baseRange float32, cooldown float32, 
 }
 
 func (s *Skill) Upgrade() {
+
+	if !s.IsAvailable() {
+		return
+	}
+
 	if s.CurrentLevel < s.MaxLevel {
 		s.CurrentLevel++
 
